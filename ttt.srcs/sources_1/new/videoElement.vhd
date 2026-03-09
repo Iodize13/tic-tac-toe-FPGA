@@ -118,6 +118,19 @@ begin
         end if;
     end process;
     
-    rgb <= X"F00";  -- Always red for testing;
-    
+    process(pDisp, video_on)
+    begin
+        if video_on = '0' then
+            rgb <= (others => '0');
+        elsif pDisp(0) = '1' then
+            if pDisp(1) = '1' then
+                rgb <= X"F00";
+            else
+                rgb <= X"FFF";
+            end if;
+        else
+            rgb <= X"000";
+        end if;
+    end process
+     
 end Behavioral;

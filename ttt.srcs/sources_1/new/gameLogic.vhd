@@ -25,6 +25,7 @@ architecture structural of gameLogic is
     signal heartbeat : std_logic := '0';
     signal rst : std_logic := '0';
     
+
     component Cell
         port(
             clk   : in  std_logic;
@@ -36,9 +37,9 @@ architecture structural of gameLogic is
     end component;
     
     -- scarlet
-    component gameState
-        port(
-            clk       : in  std_logic;
+    component port(
+            clk gameState
+              : in  std_logic;
             reset     : in  std_logic;
             cellState : in  std_logic_vector(17 downto 0);
             winState  : out std_logic;
@@ -59,18 +60,12 @@ architecture structural of gameLogic is
             Turn      : in  std_logic
         );
     end component;
-    
+
 begin
 
     rst <= reset;
     winState <= internalWin or heartbeat;
-    
-    -- Direct test outputs (bypass all logic)
-    rgb <= X"F00";  -- Constant RED
-    hsync <= '0';
-    vsync <= '0';
-    
-    -- Heartbeat LED still works
+
     process(clk)
     begin
         if rising_edge(clk) then
@@ -83,7 +78,7 @@ begin
         end if;
     end process;
 
-end structural;
+    process(internalWin, inPort, cellGames)
     begin
         sqrSel <= (others => '0');
         if internalWin = '0' then 
@@ -103,7 +98,7 @@ end structural;
     process(clk)
     begin
         
-        --อย่ากดปุ่มค้าง
+        --อย่ากดปุ่มค้าง
         if falling_edge(clk) then
             if (prevIn /= myIn and myIn /= "000000000") then
                 turnReg <= not turnReg;
@@ -130,5 +125,5 @@ end structural;
                 State => cellGames((i*2)+1 downto i*2)
             ); 
     end generate;
-              
+               
 end structural;

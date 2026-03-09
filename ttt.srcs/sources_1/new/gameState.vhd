@@ -42,14 +42,6 @@ begin
                 end if;
             end loop;
             
-            for i in 0 to 8 loop
-                if o_player(i) = '1' then
-                    colorCell(i) <= '1';
-                else
-                    colorCell(i) <= '0';
-                end if;
-            end loop;
-            
             win := '0';
             
             if (x_player(0) = '1' and x_player(1) = '1' and x_player(2) = '1') then

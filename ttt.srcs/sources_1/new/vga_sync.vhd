@@ -37,7 +37,7 @@ begin
             clk_div <= '0';
             counter <= 0;
         elsif rising_edge(clk) then
-            if counter = 3 then
+            if counter = 1 then
                 clk_div <= not clk_div;
                 counter <= 0;
             else
