@@ -1,0 +1,11 @@
+0.7
+2020.2
+Nov 14 2025
+12:36:23
+/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sim_1/new/Cell_TB.vhd,1772691686,vhdl,,,,cell_tb,,,,,,,,
+/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sim_1/new/gameLogic_tb.vhd,1772700070,vhdl,,,,gamelogic_tb,,,,,,,,
+/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sources_1/new/Cell.vhd,1772691883,vhdl,,,,cell,,,,,,,,
+/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sources_1/new/gameLogic.vhd,1772698795,vhdl,,,,gamelogic,,,,,,,,
+/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sources_1/new/gameState.vhd,1772709109,vhdl,,,,gamestate,,,,,,,,
+/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sources_1/new/vga_sync.vhd,1772698933,vhdl,,,,vga_sync,,,,,,,,
+/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sources_1/new/videoElement.vhd,1772699312,vhdl,,,,videoelement,,,,,,,,

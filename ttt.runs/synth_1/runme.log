@@ -1,0 +1,45 @@
+
+*** Running vivado
+    with args -log gameLogic.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source gameLogic.tcl
+
+
+****** Vivado v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 12:34:56 MST 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Mon Mar  9 18:43:55 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source gameLogic.tcl -notrace
+Command: read_checkpoint -auto_incremental -incremental /home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/utils_1/imports/synth_1/gameLogic.dcp
+INFO: [Vivado 12-5825] Read reference checkpoint from /home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/utils_1/imports/synth_1/gameLogic.dcp for incremental synthesis
+INFO: [Vivado 12-7989] Please ensure there are no constraint changes
+Command: synth_design -top gameLogic -part xc7a100tcsg324-1
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7a100t'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7a100t'
+INFO: [Device 21-403] Loading part xc7a100tcsg324-1
+INFO: [Designutils 20-5440] No compile time benefit to using incremental synthesis; A full resynthesis will be run
+INFO: [Designutils 20-4379] Flow is switching to default flow due to incremental criteria not met. If you would like to alter this behaviour and have the flow terminate instead, please set the following parameter config_implementation {autoIncr.Synth.RejectBehavior Terminate}
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 7 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 135303
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:05 ; elapsed = 00:00:05 . Memory (MB): peak = 2212.672 ; gain = 481.594 ; free physical = 1544 ; free virtual = 10358
+---------------------------------------------------------------------------------
+ERROR: [Synth 8-2716] syntax error near 'begin' [/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sources_1/new/gameLogic.vhd:87]
+INFO: [Synth 8-10443] VHDL file '/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sources_1/new/gameLogic.vhd' is ignored due to errors
+ERROR: [Synth 8-12189] Failed to read vhdl '/home/ionize13/uni/2y-2/dld/tic-tac-toe/ttt.srcs/sources_1/new/gameLogic.vhd'
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 2295.641 ; gain = 564.562 ; free physical = 1465 ; free virtual = 10279
+---------------------------------------------------------------------------------
+RTL Elaboration failed
+INFO: [Common 17-83] Releasing license: Synthesis
+11 Infos, 0 Warnings, 0 Critical Warnings and 3 Errors encountered.
+synth_design failed
+synth_design: Time (s): cpu = 00:00:11 ; elapsed = 00:00:11 . Memory (MB): peak = 2295.648 ; gain = 719.625 ; free physical = 1476 ; free virtual = 10290
+INFO: [Common 17-2834] synth_design peak Physical Memory [PSS] (MB): overall = 1715.922; main = 1423.697; forked = 292.225
+INFO: [Common 17-2834] synth_design peak Virtual Memory [VSS] (MB): overall = 3289.629; main = 2295.645; forked = 993.984
+ERROR: [Common 17-69] Command failed: Synthesis failed - please see the console or run log file for details
+INFO: [Common 17-206] Exiting Vivado at Mon Mar  9 18:44:12 2026...
