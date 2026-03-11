@@ -1,0 +1,25 @@
+# Vivado/Xilinx Specifics
+*.jou
+*.log
+*.pb
+*.str
+*.dir
+*.prm
+*.vdi
+*.tcl.reset
+.Xil/
+
+# Simulation and Synthesis Outputs
+xsim.dir/
+*.zip
+*.bak
+*.dcp
+*.ip_user_files/
+*.sim/
+*.hw/
+*.runs/
+*.cache/
+
+# OS specifics
+.DS_Store
+Thumbs.db

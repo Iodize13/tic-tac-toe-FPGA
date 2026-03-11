@@ -1,7 +1,0 @@
-Running: xsim.dir/gameLogic_behav/xsimk -simmode gui -wdb gameLogic_behav.wdb -simrunnum 0 -socket 42991
-Design successfully loaded
-Design Loading Memory Usage: 199224 KB (Peak: 199276 KB)
-Design Loading CPU Usage: 1700 ms
-Simulation completed
-Simulation Memory Usage: 285060 KB (Peak: 338492 KB)
-Simulation CPU Usage: 1710 ms
