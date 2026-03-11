@@ -131,6 +131,6 @@ begin
         else
             rgb <= X"000";
         end if;
-    end process
+    end process;
      
 end Behavioral;

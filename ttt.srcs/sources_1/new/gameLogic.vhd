@@ -36,10 +36,9 @@ architecture structural of gameLogic is
         );
     end component;
     
-    -- scarlet
-    component port(
-            clk gameState
-              : in  std_logic;
+    component gameState
+        port(
+            clk       : in  std_logic;
             reset     : in  std_logic;
             cellState : in  std_logic_vector(17 downto 0);
             winState  : out std_logic;
