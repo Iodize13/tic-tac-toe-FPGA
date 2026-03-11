@@ -16,63 +16,63 @@ entity vga_sync is
 end vga_sync;
 
 architecture Behavioral of vga_sync is
-    constant HD : integer := 640;
-    constant HF : integer := 16;
-    constant HB : integer := 48;
-    constant HR : integer := 96;
-    constant VD : integer := 480;
-    constant VF : integer := 10;
-    constant VB : integer := 33;
-    constant VR : integer := 2;
+    signal clk_2 : std_logic := '0';
+    signal pix_clock : std_logic := '0';
     
-    signal clk_div : STD_LOGIC := '0';
-    signal counter : integer := 0;
-    signal h_count : integer := 0;
-    signal v_count : integer := 0;
+    signal h_cnt : unsigned(9 downto 0) := (others => '0');
+    signal v_cnt : unsigned(9 downto 0) := (others => '0');
     
 begin
-    process(clk)
+    -- Clock divider: 100MHz -> 25MHz pixel clock
+    clk_div_2: process(clk, reset)
     begin
-        if reset = '1' then
-            clk_div <= '0';
-            counter <= 0;
-        elsif rising_edge(clk) then
-            if counter = 1 then
-                clk_div <= not clk_div;
-                counter <= 0;
-            else
-                counter <= counter + 1;
-            end if;
+        if (reset = '1') then 
+            clk_2 <= '0';
+        elsif rising_edge(clk) then 
+            clk_2 <= not clk_2;
+        end if; 
+    end process;
+
+    pix_clk_gen: process(clk_2, reset)
+    begin 
+        if (reset = '1') then 
+            pix_clock <= '0';
+        elsif rising_edge(clk_2) then
+            pix_clock <= not pix_clock;
         end if;
     end process;
     
-    p_tick <= clk_div;
+    p_tick <= pix_clock;
     
-    process(clk_div)
+    -- Sync signals (active low)
+    hsync <= '0' when h_cnt >= 656 and h_cnt < 752 else '1';
+    vsync <= '0' when v_cnt = 490 or v_cnt = 491 else '1';
+    
+    -- Video on during active display area
+    video_on <= '1' when h_cnt < 640 and v_cnt < 480 else '0';
+    
+    -- Position outputs
+    x <= std_logic_vector(h_cnt);
+    y <= std_logic_vector(v_cnt);
+    
+    -- Counter control
+    control: process(pix_clock, reset) 
     begin
-        if rising_edge(clk_div) then
-            if reset = '1' then
-                h_count <= 0;
-                v_count <= 0;
-            elsif h_count = (HD + HF + HB + HR - 1) then
-                h_count <= 0;
-                if v_count = (VD + VF + VB + VR - 1) then
-                    v_count <= 0;
-                else
-                    v_count <= v_count + 1;
+        if (reset = '1') then
+            h_cnt <= (others => '0');
+            v_cnt <= (others => '0'); 
+        elsif rising_edge(pix_clock) then
+            if (h_cnt < 799) then
+                h_cnt <= h_cnt + 1;
+            else 
+                h_cnt <= (others => '0');
+                if (v_cnt < 524) then 
+                    v_cnt <= v_cnt + 1;
+                else 
+                    v_cnt <= (others => '0');
                 end if;
-            else
-                h_count <= h_count + 1;
             end if;
         end if;
     end process;
-    
-    hsync <= '0' when h_count >= (HD + HF) and h_count < (HD + HF + HR) else '1';
-    vsync <= '0' when v_count >= (VD + VF) and v_count < (VD + VF + VR) else '1';
-    
-    video_on <= '1' when h_count < HD and v_count < VD else '0';
-    
-    x <= STD_LOGIC_VECTOR(to_unsigned(h_count, 10));
-    y <= STD_LOGIC_VECTOR(to_unsigned(v_count, 10));
     
 end Behavioral;
