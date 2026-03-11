@@ -30,9 +30,25 @@ architecture Behavioral of gameLogic_tb is
 
     constant clk_period : time := 10 ns;
     
-    file out_file : TEXT;
-    signal start_capture : boolean := false;
-    signal capture_done : boolean := false;
+    -- Handshake signals for capture coordination
+    signal capture_req : integer := -1;  -- Set by stim_proc
+    signal capture_ack : integer := -1;  -- Set by capture_proc
+    signal capture_complete : boolean := false;
+    
+    -- Array of button patterns for each move
+    type button_array is array (0 to 9) of std_logic_vector(8 downto 0);
+    constant buttons : button_array := (
+        "000000001",  -- cell 0
+        "000000010",  -- cell 1
+        "000000100",  -- cell 2
+        "000001000",  -- cell 3
+        "000010000",  -- cell 4
+        "000100000",  -- cell 5
+        "001000000",  -- cell 6
+        "010000000",  -- cell 7
+        "100000000",  -- cell 8
+        "000000000"   -- final state
+    );
     
 begin
     UUT: gameLogic
@@ -48,7 +64,7 @@ begin
 
     clk_process: process
     begin
-        while not capture_done loop
+        while not capture_complete loop
             clk <= '0';
             wait for clk_period/2;
             clk <= '1';
@@ -57,123 +73,101 @@ begin
         wait;
     end process;
 
-    -- Stimulus process with button presses
+    -- Stimulus process - triggers capture after each button press
     stim_proc: process
     begin
         reset <= '1';
         wait for 100 ns;
         reset <= '0';
-        wait for 50 ns;
+        wait for 100 ns;
         
-        inPort <= "000000001";
-        wait for 40 ns;
-        inPort <= "000000000";
-        wait for 40 ns;
+        -- Press each button and trigger capture after each
+        for i in 0 to 8 loop
+            inPort <= buttons(i);
+            wait for 40 ns;
+            inPort <= "000000000";
+            
+            -- Request capture of frame i
+            capture_req <= i;
+            
+            -- Wait for capture to acknowledge completion
+            wait until capture_ack = i;
+            wait for 40 ns;
+        end loop;
         
-        inPort <= "000000010";
-        wait for 40 ns;
-        inPort <= "000000000";
-        wait for 40 ns;
+        -- Final capture after all moves
+        capture_req <= 9;
+        wait until capture_ack = 9;
         
-        inPort <= "000000100";
-        wait for 40 ns;
-        inPort <= "000000000";
-        wait for 40 ns;
-        
-        inPort <= "000001000";
-        wait for 40 ns;
-        inPort <= "000000000";
-        wait for 40 ns;
-        
-        inPort <= "000010000";
-        wait for 40 ns;
-        inPort <= "000000000";
-        wait for 40 ns;
-        
-        inPort <= "000100000";
-        wait for 40 ns;
-        inPort <= "000000000";
-        wait for 40 ns;
-        
-        inPort <= "001000000";
-        wait for 40 ns;
-        inPort <= "000000000";
-        wait for 40 ns;
-        
-        inPort <= "010000000";
-        wait for 40 ns;
-        inPort <= "000000000";
-        wait for 40 ns;
-        
-        inPort <= "100000000";
-        wait for 40 ns;
-        inPort <= "000000000";
-        
-        -- Wait for capture to complete
-        wait until capture_done;
+        capture_complete <= true;
         wait;
     end process;
     
-    -- VGA capture process - captures one full frame
+    -- VGA capture process - captures frame when requested
     capture_proc: process
+        file out_file : TEXT;
         variable line_out : line;
         variable r, g, b : integer;
-        variable pixel_x : integer := 0;
-        variable pixel_y : integer := 0;
-        variable frame_started : boolean := false;
+        variable filename : string(1 to 12);
+        variable requested_frame : integer;
     begin
-        file_open(out_file, "pixels.txt", WRITE_MODE);
-        
-        -- Wait for reset to complete
         wait until reset = '0';
-        wait for 100 ns;
         
-        -- Wait for start of frame (vsync goes low then high - active low)
-        wait until vsync = '0';
-        wait until vsync = '1';
-        
-        -- Skip vertical back porch (33 lines) and some front porch
-        -- Total vertical blanking is 45 lines (10 front + 33 back + 2 sync)
-        for line_skip in 1 to 45 loop
-            wait until hsync = '0';  -- Wait for hsync pulse
-            wait until hsync = '1';  -- End of hsync
-        end loop;
-        
-        -- Now we're at the start of active video
-        report "Starting frame capture";
-        
-        for row in 0 to 479 loop  -- 480 active rows
-            -- Wait for hsync pulse (active low)
-            wait until hsync = '0';
-            wait until hsync = '1';
+        loop
+            -- Wait for capture request
+            wait until capture_req >= 0;
+            requested_frame := capture_req;
             
-            -- Skip horizontal back porch (48 pixels at 25MHz = 192 system clocks)
-            for hp in 1 to 192 loop
-                wait until rising_edge(clk);
+            -- Build filename: pixels_N.txt
+            filename := "pixels_0.txt";
+            filename(8) := character'val(character'pos('0') + requested_frame);
+            
+            file_open(out_file, filename, WRITE_MODE);
+            report "Capturing frame after button press " & integer'image(requested_frame) & " to " & filename;
+            
+            -- Wait for next vsync to start fresh frame
+            wait until vsync = '0';
+            wait until vsync = '1';
+            
+            -- Skip vertical blanking (45 lines)
+            for line_skip in 1 to 45 loop
+                wait until hsync = '0';
+                wait until hsync = '1';
             end loop;
             
-            -- Capture 640 pixels per line
-            for col in 0 to 639 loop
-                -- Sample on every 4th clock (25MHz pixel clock from 100MHz)
-                for c in 1 to 4 loop
+            -- Capture 480 active rows
+            for row in 0 to 479 loop
+                wait until hsync = '0';
+                wait until hsync = '1';
+                
+                -- Skip horizontal back porch (192 clocks)
+                for hp in 1 to 192 loop
                     wait until rising_edge(clk);
                 end loop;
                 
-                r := to_integer(unsigned(rgb(11 downto 8)));
-                g := to_integer(unsigned(rgb(7 downto 4)));
-                b := to_integer(unsigned(rgb(3 downto 0)));
-                write(line_out, r);
-                write(line_out, string'(","));
-                write(line_out, g);
-                write(line_out, string'(","));
-                write(line_out, b);
-                writeline(out_file, line_out);
+                -- Capture 640 pixels
+                for col in 0 to 639 loop
+                    for c in 1 to 4 loop
+                        wait until rising_edge(clk);
+                    end loop;
+                    
+                    r := to_integer(unsigned(rgb(11 downto 8)));
+                    g := to_integer(unsigned(rgb(7 downto 4)));
+                    b := to_integer(unsigned(rgb(3 downto 0)));
+                    write(line_out, r);
+                    write(line_out, string'(","));
+                    write(line_out, g);
+                    write(line_out, string'(","));
+                    write(line_out, b);
+                    writeline(out_file, line_out);
+                end loop;
             end loop;
+            
+            file_close(out_file);
+            report "Saved " & filename;
+            
+            -- Acknowledge completion
+            capture_ack <= requested_frame;
         end loop;
-        
-        file_close(out_file);
-        report "VGA capture complete - saved pixels.txt (640x480)";
-        capture_done <= true;
-        wait;
     end process;
 end Behavioral;
