@@ -41,15 +41,22 @@ def convert_file(filename):
 
 def convert_all():
     """Convert all pixel files (pixels_0.txt through pixels_9.txt and pixels.txt)"""
-    # Convert numbered frames
+    # Check both current directory and Vivado sim directory
+    sim_dir = "ttt.sim/sim_1/behav/xsim/"
+
     for i in range(10):
+        # Try current directory first
         filename = f"pixels_{i}.txt"
         if os.path.exists(filename):
             convert_file(filename)
+        elif os.path.exists(os.path.join(sim_dir, filename)):
+            convert_file(os.path.join(sim_dir, filename))
 
     # Also convert single frame if exists
     if os.path.exists("pixels.txt"):
         convert_file("pixels.txt")
+    elif os.path.exists(os.path.join(sim_dir, "pixels.txt")):
+        convert_file(os.path.join(sim_dir, "pixels.txt"))
 
 
 if __name__ == "__main__":

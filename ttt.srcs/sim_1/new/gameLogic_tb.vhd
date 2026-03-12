@@ -33,12 +33,9 @@ architecture Behavioral of gameLogic_tb is
     signal capture_req : integer := -1;
     signal capture_ack : integer := -1;
     
-    type button_array is array (0 to 8) of std_logic_vector(8 downto 0);
-    constant buttons : button_array := (
-        "000000001", "000000010", "000000100", 
-        "000001000", "000010000", "000100000",
-        "001000000", "010000000", "100000000"
-    );
+    -- Track game state
+    signal move_count : integer := 0;
+    signal game_over  : boolean := false;
     
 begin
     UUT: gameLogic
@@ -60,6 +57,7 @@ begin
         wait for clk_period/2;
     end process;
 
+    -- Game simulation: Human (X) plays against AI (O)
     stim_proc: process
         variable frame_num : integer := 0;
     begin
@@ -68,25 +66,85 @@ begin
         reset <= '0';
         wait for 200 ns;
         
-        -- Capture initial state
+        -- Capture initial empty board
         capture_req <= frame_num;
         wait until capture_ack = frame_num;
         frame_num := frame_num + 1;
+        wait for 500 ns;
         
-        -- Press each button and capture
-        for i in 0 to 8 loop
-            inPort <= buttons(i);
-            wait for 100 ns;
-            inPort <= "000000000";
-            wait for 100 ns;
-            
-            capture_req <= frame_num;
-            wait until capture_ack = frame_num;
-            frame_num := frame_num + 1;
-            wait for 200 ns;
-        end loop;
+        -- Human plays at cell 0 (top-left)
+        report "Human plays cell 0";
+        inPort <= "000000001";  -- Button 0
+        wait for 100 ns;
+        inPort <= "000000000";
+        wait for 100 ns;
         
-        report "Simulation complete - captured " & integer'image(frame_num) & " frames";
+        -- Wait for AI response and capture
+        wait for 2 us;
+        capture_req <= frame_num;
+        wait until capture_ack = frame_num;
+        frame_num := frame_num + 1;
+        wait for 500 ns;
+        
+        -- Human plays at cell 4 (center)
+        report "Human plays cell 4";
+        inPort <= "000010000";  -- Button 4
+        wait for 100 ns;
+        inPort <= "000000000";
+        wait for 100 ns;
+        
+        wait for 2 us;
+        capture_req <= frame_num;
+        wait until capture_ack = frame_num;
+        frame_num := frame_num + 1;
+        wait for 500 ns;
+        
+        -- Human plays at cell 8 (bottom-right)
+        report "Human plays cell 8";
+        inPort <= "100000000";  -- Button 8
+        wait for 100 ns;
+        inPort <= "000000000";
+        wait for 100 ns;
+        
+        wait for 2 us;
+        capture_req <= frame_num;
+        wait until capture_ack = frame_num;
+        frame_num := frame_num + 1;
+        wait for 500 ns;
+        
+        -- Continue with more moves if game not over
+        -- Human plays at cell 2 (top-right)
+        report "Human plays cell 2";
+        inPort <= "000000100";  -- Button 2
+        wait for 100 ns;
+        inPort <= "000000000";
+        wait for 100 ns;
+        
+        wait for 2 us;
+        capture_req <= frame_num;
+        wait until capture_ack = frame_num;
+        frame_num := frame_num + 1;
+        wait for 500 ns;
+        
+        -- Human plays at cell 6 (bottom-left)
+        report "Human plays cell 6";
+        inPort <= "001000000";  -- Button 6
+        wait for 100 ns;
+        inPort <= "000000000";
+        wait for 100 ns;
+        
+        wait for 2 us;
+        capture_req <= frame_num;
+        wait until capture_ack = frame_num;
+        frame_num := frame_num + 1;
+        wait for 500 ns;
+        
+        -- Final capture
+        wait for 2 us;
+        capture_req <= frame_num;
+        wait until capture_ack = frame_num;
+        
+        report "Game simulation complete - captured " & integer'image(frame_num + 1) & " frames";
         wait;
     end process;
     
