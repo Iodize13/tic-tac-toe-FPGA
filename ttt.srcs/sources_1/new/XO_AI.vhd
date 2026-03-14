@@ -13,13 +13,15 @@ entity XO_AI is
         C7 : in STD_LOGIC_VECTOR(1 downto 0);
         C8 : in STD_LOGIC_VECTOR(1 downto 0);
 
-        M0, M1, M2,
-        M3, M4, M5,
-        M6, M7, M8 : out STD_LOGIC
+        -- M0, M1, M2,
+        -- M3, M4, M5,
+        -- M6, M7, M8 : out STD_LOGIC
+	M_vec: out STD_LOGIC_VECTOR(8 downto 0)
     );
 end XO_AI;
 
 architecture Behavioral of XO_AI is
+        signal M0, M1, M2, M3, M4, M5, M6, M7, M8: STD_LOGIC;
 begin
 
 process(C0,C1,C2,C3,C4,C5,C6,C7,C8)
@@ -130,6 +132,8 @@ begin
     elsif (C7="00") then M7<='1';
 
     end if;
+
+    M_vec <= M6 & M7 & M8 & M3 & M4 & M5 & M0 & M1 & M2;
 
 end process;
 
