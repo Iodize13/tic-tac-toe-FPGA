@@ -3,6 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity XO_AI is
     Port (
+	clk: STD_LOGIC;
         C0 : in STD_LOGIC_VECTOR(1 downto 0);
         C1 : in STD_LOGIC_VECTOR(1 downto 0);
         C2 : in STD_LOGIC_VECTOR(1 downto 0);
@@ -24,7 +25,8 @@ architecture Behavioral of XO_AI is
         signal M0, M1, M2, M3, M4, M5, M6, M7, M8: STD_LOGIC;
 begin
 
-process(C0,C1,C2,C3,C4,C5,C6,C7,C8)
+-- process(C0,C1,C2,C3,C4,C5,C6,C7,C8)
+process(clk)
 begin
 
     -- default
@@ -37,46 +39,7 @@ begin
     -------------------------------------------------
 
     -- Rows
-    if (C0="11" and C1="11" and C2="00") then M2<='1';
-    elsif (C0="11" and C2="11" and C1="00") then M1<='1';
-    elsif (C1="11" and C2="11" and C0="00") then M0<='1';
-
-    elsif (C3="11" and C4="11" and C5="00") then M5<='1';
-    elsif (C3="11" and C5="11" and C4="00") then M4<='1';
-    elsif (C4="11" and C5="11" and C3="00") then M3<='1';
-
-    elsif (C6="11" and C7="11" and C8="00") then M8<='1';
-    elsif (C6="11" and C8="11" and C7="00") then M7<='1';
-    elsif (C7="11" and C8="11" and C6="00") then M6<='1';
-
-    -- Columns
-    elsif (C0="11" and C3="11" and C6="00") then M6<='1';
-    elsif (C0="11" and C6="11" and C3="00") then M3<='1';
-    elsif (C3="11" and C6="11" and C0="00") then M0<='1';
-
-    elsif (C1="11" and C4="11" and C7="00") then M7<='1';
-    elsif (C1="11" and C7="11" and C4="00") then M4<='1';
-    elsif (C4="11" and C7="11" and C1="00") then M1<='1';
-
-    elsif (C2="11" and C5="11" and C8="00") then M8<='1';
-    elsif (C2="11" and C8="11" and C5="00") then M5<='1';
-    elsif (C5="11" and C8="11" and C2="00") then M2<='1';
-
-    -- Diagonals
-    elsif (C0="11" and C4="11" and C8="00") then M8<='1';
-    elsif (C0="11" and C8="11" and C4="00") then M4<='1';
-    elsif (C4="11" and C8="11" and C0="00") then M0<='1';
-
-    elsif (C2="11" and C4="11" and C6="00") then M6<='1';
-    elsif (C2="11" and C6="11" and C4="00") then M4<='1';
-    elsif (C4="11" and C6="11" and C2="00") then M2<='1';
-
-    -------------------------------------------------
-    -- 2) Block X (01)
-    -------------------------------------------------
-
-    -- Rows
-    elsif (C0="01" and C1="01" and C2="00") then M2<='1';
+    if (C0="01" and C1="01" and C2="00") then M2<='1';
     elsif (C0="01" and C2="01" and C1="00") then M1<='1';
     elsif (C1="01" and C2="01" and C0="00") then M0<='1';
 
@@ -111,6 +74,45 @@ begin
     elsif (C4="01" and C6="01" and C2="00") then M2<='1';
 
     -------------------------------------------------
+    -- 2) Block X (11)
+    -------------------------------------------------
+
+    -- Rows
+    elsif (C0="11" and C1="11" and C2="00") then M2<='1';
+    elsif (C0="11" and C2="11" and C1="00") then M1<='1';
+    elsif (C1="11" and C2="11" and C0="00") then M0<='1';
+
+    elsif (C3="11" and C4="11" and C5="00") then M5<='1';
+    elsif (C3="11" and C5="11" and C4="00") then M4<='1';
+    elsif (C4="11" and C5="11" and C3="00") then M3<='1';
+
+    elsif (C6="11" and C7="11" and C8="00") then M8<='1';
+    elsif (C6="11" and C8="11" and C7="00") then M7<='1';
+    elsif (C7="11" and C8="11" and C6="00") then M6<='1';
+
+    -- Columns
+    elsif (C0="11" and C3="11" and C6="00") then M6<='1';
+    elsif (C0="11" and C6="11" and C3="00") then M3<='1';
+    elsif (C3="11" and C6="11" and C0="00") then M0<='1';
+
+    elsif (C1="11" and C4="11" and C7="00") then M7<='1';
+    elsif (C1="11" and C7="11" and C4="00") then M4<='1';
+    elsif (C4="11" and C7="11" and C1="00") then M1<='1';
+
+    elsif (C2="11" and C5="11" and C8="00") then M8<='1';
+    elsif (C2="11" and C8="11" and C5="00") then M5<='1';
+    elsif (C5="11" and C8="11" and C2="00") then M2<='1';
+
+    -- Diagonals
+    elsif (C0="11" and C4="11" and C8="00") then M8<='1';
+    elsif (C0="11" and C8="11" and C4="00") then M4<='1';
+    elsif (C4="11" and C8="11" and C0="00") then M0<='1';
+
+    elsif (C2="11" and C4="11" and C6="00") then M6<='1';
+    elsif (C2="11" and C6="11" and C4="00") then M4<='1';
+    elsif (C4="11" and C6="11" and C2="00") then M2<='1';
+
+    -------------------------------------------------
     -- 3) Center
     -------------------------------------------------
     elsif (C4="00") then M4<='1';
@@ -133,7 +135,8 @@ begin
 
     end if;
 
-    M_vec <= M6 & M7 & M8 & M3 & M4 & M5 & M0 & M1 & M2;
+    -- M_vec <= M6 & M7 & M8 & M3 & M4 & M5 & M0 & M1 & M2;
+    M_vec <= M8 & M7 & M6 & M5 & M4 & M3 & M2 & M1 & M0;
 
 end process;
 
