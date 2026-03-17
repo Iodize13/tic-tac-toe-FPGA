@@ -44,18 +44,21 @@ begin
     
     p_tick <= pix_clock;
     
-    -- Sync signals (active low)
+    -- Sync signals - EXACT match to test-vga/main.vhd (which works on real hardware)
+    -- Active LOW hsync: pulse from pixel 656 to 751 (96 pixels wide)
     hsync <= '0' when h_cnt >= 656 and h_cnt < 752 else '1';
-    vsync <= '0' when v_cnt = 490 or v_cnt = 491 else '1';
     
-    -- Video on during active display area
-    video_on <= '1' when h_cnt < 640 and v_cnt < 480 else '0';
+    -- Active HIGH vsync: pulse at lines 412-413 (matches test-vga exactly)
+    vsync <= '1' when v_cnt = 412 or v_cnt = 413 else '0';
+    
+    -- Video on during active display area (640x400 to match test-vga)
+    video_on <= '1' when h_cnt < 640 and v_cnt < 400 else '0';
     
     -- Position outputs
     x <= std_logic_vector(h_cnt);
     y <= std_logic_vector(v_cnt);
     
-    -- Counter control
+    -- Counter control - EXACT match to test-vga (800x449)
     control: process(pix_clock, reset) 
     begin
         if (reset = '1') then
@@ -66,7 +69,7 @@ begin
                 h_cnt <= h_cnt + 1;
             else 
                 h_cnt <= (others => '0');
-                if (v_cnt < 524) then 
+                if (v_cnt < 448) then 
                     v_cnt <= v_cnt + 1;
                 else 
                     v_cnt <= (others => '0');

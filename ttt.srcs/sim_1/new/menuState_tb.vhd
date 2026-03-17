@@ -55,12 +55,16 @@ begin
     -- Game simulation: Human (X) plays against AI (O)
     stim_proc: process
     begin
-	btHuman_tb <= '0';
-	btPve_tb <= '1';
-        wait for 10 ns;
         reset <= '1';
         wait for 200 ns;
         reset <= '0';
+        wait for 200 ns;
+	btHuman_tb <= '1';
+	btPve_tb <= '0';
+        -- wait for 10 ns;
+        -- reset <= '1';
+        -- wait for 200 ns;
+        -- reset <= '0';
         wait for 200 ns;
         
         -- Human plays at cell 0 (top-left)
@@ -99,6 +103,37 @@ begin
         inPort_tb <= "000000000";
         wait for 100 ns;
         
+        report "Human plays cell 6";
+        inPort_tb <= "000001000";  -- Button 6
+        wait for 100 ns;
+        inPort_tb <= "000000000";
+        wait for 100 ns;
+        report "Human plays cell 6";
+        inPort_tb <= "010000000";  -- Button 6
+        wait for 100 ns;
+        inPort_tb <= "000000000";
+        wait for 100 ns;
+	reset <= '1';
+        wait for 100 ns;
+	reset <= '0';
+        wait for 100 ns;
+	btHuman_tb <= '0';
+	btPve_tb <= '1';
+        wait for 100 ns;
+
+        inPort_tb <= "000010000";  -- Button 0
+        wait for 200 ns;
+        inPort_tb <= "000000100";
+        wait for 200 ns;
+        inPort_tb <= "100000000";
+        wait for 100 ns;
+	reset <= '1';
+        wait for 100 ns;
+	reset <= '0';
+	btHuman_tb <= '0';
+	btPve_tb <= '1';
+        wait for 100 ns;
+
         report "Game simulation complete - captured ";
         wait;
     end process;

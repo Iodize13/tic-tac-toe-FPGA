@@ -17,11 +17,11 @@ end videoElement;
 
 architecture Behavioral of videoElement is
     constant hRes : integer := 640;
-    constant vRes : integer := 480;
+    constant vRes : integer := 400;  -- Changed to match test-vga
     constant hBorder : integer := 100;
     constant vBorder : integer := 20;
-    constant hLinePos1 : integer := vBorder + 147;
-    constant hLinePos2 : integer := vRes - 20 - 147;
+    constant hLinePos1 : integer := vBorder + 120;  -- Adjusted for 400 height
+    constant hLinePos2 : integer := vRes - 20 - 120;
     constant vLinePos1 : integer := hBorder + 147;
     constant vLinePos2 : integer := hRes - 100 - 147;
     constant sqBorder : integer := 40;

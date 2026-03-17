@@ -20,7 +20,7 @@ architecture structural of gameLogic is
     signal cellGames   : std_logic_vector(17 downto 0);
     signal prevIn      : std_logic_vector(8 downto 0) := (others => '0');
     signal myIn        : std_logic_vector(8 downto 0) := (others => '0');
-    signal turnReg     : std_logic := '0';
+    signal turnReg     : std_logic := '1';
     signal colorSig    : std_logic_vector(8 downto 0); 
     signal internalWin : std_logic;
     signal clk_count   : integer := 0;
@@ -127,7 +127,7 @@ begin
             if reset = '1' then
                 state <= IDLE;
                 sqrSel <= (others => '0');
-                turnReg <= '0';
+                turnReg <= '1';
                 delay_cnt <= 0;
                 prev_inPort <= (others => '0');
                 ai_move_latched <= (others => '0');
@@ -178,7 +178,7 @@ begin
                         -- Execute human move
                         sqrSel <= move_to_play;
                         -- Toggle turn
-                        turnReg <= '1';  -- AI's turn
+                        turnReg <= '0';  -- AI's turn
                         -- Start delay
                         delay_cnt <= 0;
                         state <= AI_DELAY;
@@ -194,12 +194,16 @@ begin
                         end if;
                         
                     when AI_PLAY =>
+                        if internalWin = '1' then
+                            state <= GAME_OVER;
+			else
                         -- Execute AI move
-                        sqrSel <= ai_move_latched;
-                        -- Toggle turn back to human
-                        turnReg <= '0';
-                        -- Go back to idle to wait for next human move
-                        state <= IDLE;
+			    sqrSel <= ai_move_latched;
+			-- Toggle turn back to human
+			    turnReg <= '1';
+			-- Go back to idle to wait for next human move
+			    state <= IDLE;
+			end if;
                         
                     when GAME_OVER =>
                         -- Stay in game over state
@@ -235,3 +239,4 @@ begin
     cellTemp <= cellGames;
                
 end structural;
+

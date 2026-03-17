@@ -16,11 +16,34 @@ set_property -dict {PACKAGE_PIN U18 IOSTANDARD LVCMOS33} [get_ports {inPort[6]}]
 set_property -dict {PACKAGE_PIN R13 IOSTANDARD LVCMOS33} [get_ports {inPort[7]}]
 set_property -dict {PACKAGE_PIN T8 IOSTANDARD LVCMOS33} [get_ports {inPort[8]}]
 
+set_property -dict {PACKAGE_PIN H17 IOSTANDARD LVCMOS33} [get_ports {cellTemp[0]}]
+set_property -dict {PACKAGE_PIN K15 IOSTANDARD LVCMOS33} [get_ports {cellTemp[1]}]
+set_property -dict {PACKAGE_PIN J13 IOSTANDARD LVCMOS33} [get_ports {cellTemp[2]}]
+set_property -dict {PACKAGE_PIN N14 IOSTANDARD LVCMOS33} [get_ports {cellTemp[3]}]
+set_property -dict {PACKAGE_PIN R18 IOSTANDARD LVCMOS33} [get_ports {cellTemp[4]}]
+set_property -dict {PACKAGE_PIN V17 IOSTANDARD LVCMOS33} [get_ports {cellTemp[5]}]
+set_property -dict {PACKAGE_PIN U17 IOSTANDARD LVCMOS33} [get_ports {cellTemp[6]}]
+set_property -dict {PACKAGE_PIN U16 IOSTANDARD LVCMOS33} [get_ports {cellTemp[7]}]
+set_property -dict {PACKAGE_PIN V16 IOSTANDARD LVCMOS33} [get_ports {cellTemp[8]}]
+set_property -dict {PACKAGE_PIN T15 IOSTANDARD LVCMOS33} [get_ports {cellTemp[9]}]
+set_property -dict {PACKAGE_PIN U14 IOSTANDARD LVCMOS33} [get_ports {cellTemp[10]}]
+set_property -dict {PACKAGE_PIN T16 IOSTANDARD LVCMOS33} [get_ports {cellTemp[11]}]
+set_property -dict {PACKAGE_PIN V15 IOSTANDARD LVCMOS33} [get_ports {cellTemp[12]}]
+set_property -dict {PACKAGE_PIN V14 IOSTANDARD LVCMOS33} [get_ports {cellTemp[13]}]
+set_property -dict {PACKAGE_PIN V12 IOSTANDARD LVCMOS33} [get_ports {cellTemp[14]}]
+
+set_property SEVERITY {Warning} [get_drc_checks NSTD-1]
+
+# set_property -dict {PACKAGE_PIN V11 IOSTANDARD LVCMOS33} [get_ports {cellTemp[15]}]
+
 # LED output for win state
-set_property -dict {PACKAGE_PIN H17 IOSTANDARD LVCMOS33} [get_ports {winState}]
+set_property -dict {PACKAGE_PIN V11 IOSTANDARD LVCMOS33} [get_ports {winState}]
 
 # Reset button (active high - pulled down so default=0)
-set_property -dict {PACKAGE_PIN C12 IOSTANDARD LVCMOS33 PULLDOWN TRUE} [get_ports {reset}]
+# set_property -dict {PACKAGE_PIN C12 IOSTANDARD LVCMOS33 PULLDOWN TRUE} [get_ports {reset}]
+set_property -dict {PACKAGE_PIN M18 IOSTANDARD LVCMOS33} [get_ports {reset}]
+set_property -dict {PACKAGE_PIN P17 IOSTANDARD LVCMOS33} [get_ports {btHuman}]
+set_property -dict {PACKAGE_PIN N17 IOSTANDARD LVCMOS33} [get_ports {btPve}]
 
 ##VGA Connector
 set_property -dict { PACKAGE_PIN A3    IOSTANDARD LVCMOS33 } [get_ports { rgb[0] }]; #IO_L8N_T1_AD14N_35 Sch=vga_r[0]
