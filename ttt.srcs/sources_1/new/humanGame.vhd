@@ -79,18 +79,20 @@ begin
     end process;
 
     process(internalWin, inPort, cellGames)
+        variable inPort_popcount : integer range 0 to 9;
     begin
         sqrSel <= (others => '0');
-        if internalWin = '0' then 
-            -- if    (inPort(6) = '1' and cellGames(16) = '0') then sqrSel(8) <= '1';
-            -- elsif (inPort(7) = '1' and cellGames(14) = '0') then sqrSel(7) <= '1';
-            -- elsif (inPort(8) = '1' and cellGames(12) = '0') then sqrSel(6) <= '1';
-            -- elsif (inPort(3) = '1' and cellGames(10) = '0') then sqrSel(5) <= '1';
-            -- elsif (inPort(4) = '1' and cellGames(8) = '0')  then sqrSel(4) <= '1';
-            -- elsif (inPort(5) = '1' and cellGames(6) = '0')  then sqrSel(3) <= '1';
-            -- elsif (inPort(0) = '1' and cellGames(4) = '0')  then sqrSel(2) <= '1';
-            -- elsif (inPort(1) = '1' and cellGames(2) = '0')  then sqrSel(1) <= '1';
-            -- elsif (inPort(2) = '1' and cellGames(0) = '0')  then sqrSel(0) <= '1';
+        
+        -- Count how many switches are pressed
+        inPort_popcount := 0;
+        for i in 0 to 8 loop
+            if inPort(i) = '1' then
+                inPort_popcount := inPort_popcount + 1;
+            end if;
+        end loop;
+        
+        -- Only process input if exactly one switch is pressed
+        if internalWin = '0' and inPort_popcount = 1 then 
             if    (inPort(8) = '1' and cellGames(16) = '0') then sqrSel(8) <= '1';
             elsif (inPort(7) = '1' and cellGames(14) = '0') then sqrSel(7) <= '1';
             elsif (inPort(6) = '1' and cellGames(12) = '0') then sqrSel(6) <= '1';
