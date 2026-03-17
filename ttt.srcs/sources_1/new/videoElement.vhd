@@ -17,11 +17,11 @@ end videoElement;
 
 architecture Behavioral of videoElement is
     constant hRes : integer := 640;
-    constant vRes : integer := 400;  -- Changed to match test-vga
+    constant vRes : integer := 480;  -- 640x480 resolution
     constant hBorder : integer := 100;
-    constant vBorder : integer := 20;
-    constant hLinePos1 : integer := vBorder + 120;  -- Adjusted for 400 height
-    constant hLinePos2 : integer := vRes - 20 - 120;
+    constant vBorder : integer := 40;
+    constant hLinePos1 : integer := vBorder + 133;  -- Adjusted for 480 height
+    constant hLinePos2 : integer := vRes - vBorder - 133;
     constant vLinePos1 : integer := hBorder + 147;
     constant vLinePos2 : integer := hRes - 100 - 147;
     constant sqBorder : integer := 40;
@@ -244,7 +244,7 @@ begin
             rgb <= (others => '0');
         elsif pDisp(2) = '1' then  -- Symbol (X or O)
             if pDisp(1) = '1' then   -- Red
-                rgb <= X"E94";       -- Red filled
+                rgb <= X"00F";       -- Red filled
             else
                 rgb <= X"FFF";       -- White outline
             end if;
