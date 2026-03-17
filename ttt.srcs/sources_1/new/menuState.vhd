@@ -11,7 +11,8 @@ entity menuState is
 	   vsync    : out std_logic;
 	   rgb      : out std_logic_vector(11 downto 0);
 	   winState : out std_logic;
-	   playFirst : out std_logic
+	   playFirst : out std_logic;
+	   menuDisplay : out std_logic
        );
 end menuState;
 
@@ -81,6 +82,7 @@ begin
 	if rising_edge(clk) then
             if reset = '1' then
 		curState <= MENU;
+		menuDisplay <= '1';
 	    else
 		case curState is
 		    when MENU =>
@@ -91,6 +93,7 @@ begin
 			    curState <= PVE;
 			    report "case: 1";
 			end if;
+			menuDisplay <= '0';
 		    when HUMAN =>
 		    -- TODO: implement with Human mode
 
