@@ -44,57 +44,56 @@ begin
             end loop;
             
             win := '0';
+            colorCell <= (others => '0');
             
+            -- X wins: top row
             if (x_player(0) = '1' and x_player(1) = '1' and x_player(2) = '1') then
-                win := '1'; colorCell <= "111111111";
-		report "case: 0";
+                win := '1'; colorCell <= "000000111";
+            -- X wins: middle row
             elsif (x_player(3) = '1' and x_player(4) = '1' and x_player(5) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 1";
+                win := '1'; colorCell <= "000111000";
+            -- X wins: bottom row
             elsif (x_player(6) = '1' and x_player(7) = '1' and x_player(8) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 2";
+                win := '1'; colorCell <= "111000000";
+            -- X wins: left column
             elsif (x_player(0) = '1' and x_player(3) = '1' and x_player(6) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 3";
+                win := '1'; colorCell <= "001001001";
+            -- X wins: middle column
             elsif (x_player(1) = '1' and x_player(4) = '1' and x_player(7) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 4";
+                win := '1'; colorCell <= "010010010";
+            -- X wins: right column
             elsif (x_player(2) = '1' and x_player(5) = '1' and x_player(8) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 5";
+                win := '1'; colorCell <= "100100100";
+            -- X wins: diagonal top-left to bottom-right
             elsif (x_player(0) = '1' and x_player(4) = '1' and x_player(8) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 6";
+                win := '1'; colorCell <= "100010001";
+            -- X wins: diagonal top-right to bottom-left
             elsif (x_player(2) = '1' and x_player(4) = '1' and x_player(6) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 7";
+                win := '1'; colorCell <= "001010100";
+            -- O wins: top row
             elsif (o_player(0) = '1' and o_player(1) = '1' and o_player(2) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 8";
+                win := '1'; colorCell <= "000000111";
+            -- O wins: middle row
             elsif (o_player(3) = '1' and o_player(4) = '1' and o_player(5) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 9";
+                win := '1'; colorCell <= "000111000";
+            -- O wins: bottom row
             elsif (o_player(6) = '1' and o_player(7) = '1' and o_player(8) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 10";
+                win := '1'; colorCell <= "111000000";
+            -- O wins: left column
             elsif (o_player(0) = '1' and o_player(3) = '1' and o_player(6) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 11";
+                win := '1'; colorCell <= "001001001";
+            -- O wins: middle column
             elsif (o_player(1) = '1' and o_player(4) = '1' and o_player(7) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 12";
+                win := '1'; colorCell <= "010010010";
+            -- O wins: right column
             elsif (o_player(2) = '1' and o_player(5) = '1' and o_player(8) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 13";
+                win := '1'; colorCell <= "100100100";
+            -- O wins: diagonal top-left to bottom-right
             elsif (o_player(0) = '1' and o_player(4) = '1' and o_player(8) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 14";
+                win := '1'; colorCell <= "100010001";
+            -- O wins: diagonal top-right to bottom-left
             elsif (o_player(2) = '1' and o_player(4) = '1' and o_player(6) = '1') then
-                win := '1'; colorCell <= "111111111";
-		-- report "case: 15";
-            else
-                colorCell <= (others => '0');
+                win := '1'; colorCell <= "001010100";
             end if;
             
             winState <= win;

@@ -55,6 +55,24 @@ architecture Behavioral of videoElement is
         return in_rect and not in_inner;
     end function;
     
+    -- Function to check if point is on a plus sign
+    function in_plus(h, v, h1, v1, h2, v2, thick : integer) return boolean is
+        variable h_center : integer;
+        variable v_center : integer;
+        variable on_h_bar : boolean;
+        variable on_v_bar : boolean;
+    begin
+        h_center := (h1 + h2) / 2;
+        v_center := (v1 + v2) / 2;
+        -- Horizontal bar: centered vertically, full width minus padding
+        on_h_bar := (v >= v_center - thick and v <= v_center + thick and 
+                     h >= h1 + thick*2 and h <= h2 - thick*2);
+        -- Vertical bar: centered horizontally, full height minus padding
+        on_v_bar := (h >= h_center - thick and h <= h_center + thick and 
+                     v >= v1 + thick*2 and v <= v2 - thick*2);
+        return on_h_bar or on_v_bar;
+    end function;
+    
 begin
     vga_sync_inst : vga_sync
         port map (
@@ -103,10 +121,10 @@ begin
             isX := (Cells(1) = '0' and Cells(0) = '1');  -- "01" = X
             isO := (Cells(1) = '1' and Cells(0) = '1');  -- "11" = O
             if (h >= cell_h1 and h <= cell_h2 and v >= cell_v1 and v <= cell_v2) then
-                if isX then
-                    pDisp <= "111";  -- X: filled red (CHANGED)
+                if isX and in_plus(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
+                    if Color(0) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 elsif isO and in_outline(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
-                    pDisp <= "011";  -- O: white outline (CHANGED)
+                    if Color(0) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 end if;
             end if;
             
@@ -116,10 +134,10 @@ begin
             isX := (Cells(3) = '0' and Cells(2) = '1');
             isO := (Cells(3) = '1' and Cells(2) = '1');
             if (h >= cell_h1 and h <= cell_h2 and v >= cell_v1 and v <= cell_v2) then
-                if isX then
-                    pDisp <= "111";
+                if isX and in_plus(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
+                    if Color(1) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 elsif isO and in_outline(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
-                    pDisp <= "011";
+                    if Color(1) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 end if;
             end if;
             
@@ -129,10 +147,10 @@ begin
             isX := (Cells(5) = '0' and Cells(4) = '1');
             isO := (Cells(5) = '1' and Cells(4) = '1');
             if (h >= cell_h1 and h <= cell_h2 and v >= cell_v1 and v <= cell_v2) then
-                if isX then
-                    pDisp <= "111";
+                if isX and in_plus(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
+                    if Color(2) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 elsif isO and in_outline(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
-                    pDisp <= "011";
+                    if Color(2) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 end if;
             end if;
             
@@ -144,10 +162,10 @@ begin
             isX := (Cells(7) = '0' and Cells(6) = '1');
             isO := (Cells(7) = '1' and Cells(6) = '1');
             if (h >= cell_h1 and h <= cell_h2 and v >= cell_v1 and v <= cell_v2) then
-                if isX then
-                    pDisp <= "111";
+                if isX and in_plus(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
+                    if Color(3) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 elsif isO and in_outline(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
-                    pDisp <= "011";
+                    if Color(3) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 end if;
             end if;
             
@@ -157,10 +175,10 @@ begin
             isX := (Cells(9) = '0' and Cells(8) = '1');
             isO := (Cells(9) = '1' and Cells(8) = '1');
             if (h >= cell_h1 and h <= cell_h2 and v >= cell_v1 and v <= cell_v2) then
-                if isX then
-                    pDisp <= "111";
+                if isX and in_plus(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
+                    if Color(4) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 elsif isO and in_outline(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
-                    pDisp <= "011";
+                    if Color(4) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 end if;
             end if;
             
@@ -170,10 +188,10 @@ begin
             isX := (Cells(11) = '0' and Cells(10) = '1');
             isO := (Cells(11) = '1' and Cells(10) = '1');
             if (h >= cell_h1 and h <= cell_h2 and v >= cell_v1 and v <= cell_v2) then
-                if isX then
-                    pDisp <= "111";
+                if isX and in_plus(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
+                    if Color(5) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 elsif isO and in_outline(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
-                    pDisp <= "011";
+                    if Color(5) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 end if;
             end if;
             
@@ -185,10 +203,10 @@ begin
             isX := (Cells(13) = '0' and Cells(12) = '1');
             isO := (Cells(13) = '1' and Cells(12) = '1');
             if (h >= cell_h1 and h <= cell_h2 and v >= cell_v1 and v <= cell_v2) then
-                if isX then
-                    pDisp <= "111";
+                if isX and in_plus(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
+                    if Color(6) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 elsif isO and in_outline(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
-                    pDisp <= "011";
+                    if Color(6) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 end if;
             end if;
             
@@ -198,10 +216,10 @@ begin
             isX := (Cells(15) = '0' and Cells(14) = '1');
             isO := (Cells(15) = '1' and Cells(14) = '1');
             if (h >= cell_h1 and h <= cell_h2 and v >= cell_v1 and v <= cell_v2) then
-                if isX then
-                    pDisp <= "111";
+                if isX and in_plus(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
+                    if Color(7) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 elsif isO and in_outline(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
-                    pDisp <= "011";
+                    if Color(7) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 end if;
             end if;
             
@@ -211,10 +229,10 @@ begin
             isX := (Cells(17) = '0' and Cells(16) = '1');
             isO := (Cells(17) = '1' and Cells(16) = '1');
             if (h >= cell_h1 and h <= cell_h2 and v >= cell_v1 and v <= cell_v2) then
-                if isX then
-                    pDisp <= "111";
+                if isX and in_plus(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
+                    if Color(8) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 elsif isO and in_outline(h, v, cell_h1, cell_v1, cell_h2, cell_v2, outlineThick) then
-                    pDisp <= "011";
+                    if Color(8) = '1' then pDisp <= "111"; else pDisp <= "011"; end if;
                 end if;
             end if;
         end if;
@@ -226,7 +244,7 @@ begin
             rgb <= (others => '0');
         elsif pDisp(2) = '1' then  -- Symbol (X or O)
             if pDisp(1) = '1' then   -- Red
-                rgb <= X"F00";       -- Red filled
+                rgb <= X"E94";       -- Red filled
             else
                 rgb <= X"FFF";       -- White outline
             end if;
