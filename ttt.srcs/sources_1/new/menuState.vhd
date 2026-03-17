@@ -10,7 +10,8 @@ entity menuState is
 	   hsync    : out std_logic;
 	   vsync    : out std_logic;
 	   rgb      : out std_logic_vector(11 downto 0);
-	   winState : out std_logic
+	   winState : out std_logic;
+	   playFirst : out std_logic
        );
 end menuState;
 
@@ -74,7 +75,7 @@ begin
 	port map (inPort => inPort, reset => reset, clk => clk, hsync => hsync0, vsync => vsync0, rgb => rgb0, winState => winState0);
 
     PVE_INST: gameLogic
-	port map (inPort => inPort, reset => reset, clk => clk, hsync => hsync1, vsync => vsync1, rgb => rgb1, winState => winState1);
+	port map (inPort => inPort, reset => reset, clk => clk, hsync => hsync1, vsync => vsync1, rgb => rgb1, winState => winState1, playFirst => playFirst);
     MENU_INST: process(clk)
     begin
 	if rising_edge(clk) then
