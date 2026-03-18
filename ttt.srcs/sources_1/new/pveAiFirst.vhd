@@ -25,7 +25,7 @@ architecture structural of pveAiFirst is
     signal internalWin : std_logic;
     signal rst         : std_logic := '0';
     
-    type state_t is (AI_FIRST, IDLE, SELECT_CELL, EXECUTE_WAIT, HUMAN_TURN, AI_DELAY, AI_TURN, GAME_OVER);
+    type state_t is (AI_FIRST, IDLE, SELECT_CELL, EXECUTE_WAIT, APPLY_MOVE, AI_DELAY, AI_TURN, GAME_OVER);
     signal state : state_t := AI_FIRST;
     signal delay_cnt : integer range 0 to 31 := 0;
     signal prev_execute : std_logic := '0';
@@ -76,21 +76,43 @@ architecture structural of pveAiFirst is
             BTN_Out  : out STD_LOGIC
         );
     end component;
+    
+    component inputDecoder
+        port(
+            internalWin : in  std_logic;
+            inPort      : in  std_logic_vector(8 downto 0);
+            cellGame    : in  std_logic_vector(17 downto 0);
+            SqrSel      : out std_logic_vector(8 downto 0)
+        );
+    end component;
+    
+    signal decoder_sel : std_logic_vector(8 downto 0);
 
 begin
     rst <= reset;
     winState <= internalWin;
 
     -- Debounce the execute button
-    EXEC_DEBOUNCE : button_debouncer
-        generic map (
-            CLK_FREQ    => 100_000_000,
-            DEBOUNCE_MS => 10
-        )
+    EXEC_DEBOUNCE : 
+	-- button_debouncer
+        -- generic map (
+        --     CLK_FREQ    => 100_000_000,
+        --     DEBOUNCE_MS => 10
+        -- )
+        -- port map (
+        --     Clk     => clk,
+        --     BTN_In  => execute,
+        --     BTN_Out => execute_debounced
+        -- );
+	execute_debounced <= execute;
+
+    -- Input decoder for switch selection
+    DECODER : inputDecoder
         port map (
-            Clk     => clk,
-            BTN_In  => execute,
-            BTN_Out => execute_debounced
+            internalWin => internalWin,
+            inPort      => inPort,
+            cellGame    => cellGames,
+            SqrSel      => decoder_sel
         );
 
     -- AI component (AI plays as X, so uses O_AI)
@@ -145,33 +167,9 @@ begin
                         end if;
                         
                     when SELECT_CELL =>
-                        -- Check which switch is pressed (priority order)
-                        if inPort(0) = '1' and is_empty(0, cellGames) then
-                            selected_cell <= 0; selected_move <= "000000001";
-                            state <= EXECUTE_WAIT;
-                        elsif inPort(1) = '1' and is_empty(1, cellGames) then
-                            selected_cell <= 1; selected_move <= "000000010";
-                            state <= EXECUTE_WAIT;
-                        elsif inPort(2) = '1' and is_empty(2, cellGames) then
-                            selected_cell <= 2; selected_move <= "000000100";
-                            state <= EXECUTE_WAIT;
-                        elsif inPort(3) = '1' and is_empty(3, cellGames) then
-                            selected_cell <= 3; selected_move <= "000001000";
-                            state <= EXECUTE_WAIT;
-                        elsif inPort(4) = '1' and is_empty(4, cellGames) then
-                            selected_cell <= 4; selected_move <= "000010000";
-                            state <= EXECUTE_WAIT;
-                        elsif inPort(5) = '1' and is_empty(5, cellGames) then
-                            selected_cell <= 5; selected_move <= "000100000";
-                            state <= EXECUTE_WAIT;
-                        elsif inPort(6) = '1' and is_empty(6, cellGames) then
-                            selected_cell <= 6; selected_move <= "001000000";
-                            state <= EXECUTE_WAIT;
-                        elsif inPort(7) = '1' and is_empty(7, cellGames) then
-                            selected_cell <= 7; selected_move <= "010000000";
-                            state <= EXECUTE_WAIT;
-                        elsif inPort(8) = '1' and is_empty(8, cellGames) then
-                            selected_cell <= 8; selected_move <= "100000000";
+                        -- Use inputDecoder to check which switch is pressed
+                        if decoder_sel /= "000000000" then
+                            selected_move <= decoder_sel;
                             state <= EXECUTE_WAIT;
                         end if;
                         
@@ -181,14 +179,14 @@ begin
                             -- Switch released, go back to selection
                             state <= SELECT_CELL;
                         elsif execute_debounced = '1' and execute_prev = '0' then
-                            -- Execute only if switch still held
-                            human_move_latched <= selected_move;
-                            state <= HUMAN_TURN;
+                            -- Execute button pressed, go to APPLY_MOVE
+                            state <= APPLY_MOVE;
                         end if;
                         execute_prev <= execute_debounced;
                         
-                    when HUMAN_TURN =>
-                        sqrSel <= human_move_latched;
+                    when APPLY_MOVE =>
+                        -- Apply the move for one clock cycle
+                        sqrSel <= selected_move;
                         turnReg <= not turnReg;
                         delay_cnt <= 0;
                         state <= AI_DELAY;

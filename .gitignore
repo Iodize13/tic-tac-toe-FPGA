@@ -16,7 +16,6 @@ xsim.dir/
 *.dcp
 *.ip_user_files/
 *.sim/
-*.hw/
 *.runs/
 *.cache/
 

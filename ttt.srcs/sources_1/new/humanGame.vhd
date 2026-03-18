@@ -77,6 +77,17 @@ architecture structural of humanGame is
             BTN_Out  : out STD_LOGIC
         );
     end component;
+    
+    component inputDecoder
+        port(
+            internalWin : in  std_logic;
+            inPort      : in  std_logic_vector(8 downto 0);
+            cellGame    : in  std_logic_vector(17 downto 0);
+            SqrSel      : out std_logic_vector(8 downto 0)
+        );
+    end component;
+    
+    signal decoder_sel : std_logic_vector(8 downto 0);
 
 begin
     rst <= reset;
@@ -92,6 +103,15 @@ begin
             Clk     => clk,
             BTN_In  => execute,
             BTN_Out => execute_debounced
+        );
+
+    -- Input decoder for switch selection
+    DECODER : inputDecoder
+        port map (
+            internalWin => internalWin,
+            inPort      => inPort,
+            cellGame    => cellGames,
+            SqrSel      => decoder_sel
         );
 
     -- State machine with execute button
@@ -114,33 +134,9 @@ begin
                         end if;
                         
                     when SELECT_CELL =>
-                        -- Check which switch is pressed and if cell is empty
-                        if inPort(0) = '1' and is_empty(0, cellGames) then
-                            selected_move <= "000000001";
-                            state <= EXECUTE_MOVE;
-                        elsif inPort(1) = '1' and is_empty(1, cellGames) then
-                            selected_move <= "000000010";
-                            state <= EXECUTE_MOVE;
-                        elsif inPort(2) = '1' and is_empty(2, cellGames) then
-                            selected_move <= "000000100";
-                            state <= EXECUTE_MOVE;
-                        elsif inPort(3) = '1' and is_empty(3, cellGames) then
-                            selected_move <= "000001000";
-                            state <= EXECUTE_MOVE;
-                        elsif inPort(4) = '1' and is_empty(4, cellGames) then
-                            selected_move <= "000010000";
-                            state <= EXECUTE_MOVE;
-                        elsif inPort(5) = '1' and is_empty(5, cellGames) then
-                            selected_move <= "000100000";
-                            state <= EXECUTE_MOVE;
-                        elsif inPort(6) = '1' and is_empty(6, cellGames) then
-                            selected_move <= "001000000";
-                            state <= EXECUTE_MOVE;
-                        elsif inPort(7) = '1' and is_empty(7, cellGames) then
-                            selected_move <= "010000000";
-                            state <= EXECUTE_MOVE;
-                        elsif inPort(8) = '1' and is_empty(8, cellGames) then
-                            selected_move <= "100000000";
+                        -- Use inputDecoder to check which switch is pressed
+                        if decoder_sel /= "000000000" then
+                            selected_move <= decoder_sel;
                             state <= EXECUTE_MOVE;
                         end if;
                         

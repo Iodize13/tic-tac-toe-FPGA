@@ -11,6 +11,7 @@ architecture Behavioral of gameLogic_tb is
     component gameLogic
         port(
             inPort   : in  std_logic_vector(8 downto 0);
+            execute  : in  std_logic;
             reset    : in  std_logic;
             clk      : in  std_logic;
 	    playFirst : in std_logic;
@@ -22,6 +23,7 @@ architecture Behavioral of gameLogic_tb is
     end component;
 
     signal inPort   : STD_LOGIC_VECTOR(8 downto 0) := "000000000";
+    signal execute  : STD_LOGIC := '0';
     signal reset    : STD_LOGIC := '1';
     signal clk      : STD_LOGIC := '0';
     signal hsync    : STD_LOGIC;
@@ -40,6 +42,7 @@ begin
     UUT: gameLogic
         port map (
             inPort => inPort,
+            execute => execute,
             reset => reset,
             clk => clk,
             hsync => hsync,
@@ -64,47 +67,42 @@ begin
 	playF_tb <= '1';
         wait for 20 ns;
         reset <= '0';
-        wait for 200 ns;
+        wait for 100 ns;
         
-        -- Human plays at cell 0 (top-left)
-        report "Human plays cell 8";
-        inPort <= "000000100";
-        wait for 200 ns;
-        inPort <= "100000000";
-        wait for 200 ns;
-        -- inPort <= "000010000";  -- Button 0
-        -- wait for 200 ns;
+        -- Move 1: Human plays at cell 0 (top-left)
+        report "Human selects cell 0";
+        inPort <= "000000001";  -- Select cell 0
+        wait for 245 ns;
+        report "Human presses execute";
+        execute <= '1';         -- Press execute
+	wait for 50 ns;
+        -- wait for 2 ms;
+        execute <= '0';         -- Release execute
+        wait for 200 ns;        -- Wait for AI response
         
-        -- Human plays at cell 4 (center)
---        report "Human plays cell 2";
---        inPort <= "000000010";  -- Button 4
---        wait for 10 ns;
---        inPort <= "000000000";
---        wait for 10 ns;
+        -- Move 2: Human plays at cell 4 (center)
+        report "Human selects cell 4";
+        inPort <= "000000011";  -- Select cell 4
+        wait for 50 ns;
+        report "Human presses execute";
+        execute <= '1';         -- Press execute
+	wait for 50 ns;
+        -- wait for 2 ms;
+        execute <= '0';         -- Release execute
+        wait for 200 ns;        -- Wait for AI response
         
---        -- Human plays at cell 8 (bottom-right)
---        report "Human plays cell 6";
---        inPort <= "000100000";  -- Button 8
---        wait for 10 ns;
---        inPort <= "000000000";
---        wait for 10 ns;
+        -- Move 3: Human plays at cell 8 (bottom-right)
+        report "Human selects cell 8";
+        inPort <= "100000011";  -- Select cell 8
+        wait for 50 ns;
+        report "Human presses execute";
+        execute <= '1';         -- Press execute
+	wait for 50 ns;
+        -- wait for 2 ms;
+        execute <= '0';         -- Release execute
+        wait for 200 ns;        -- Wait for AI response
         
---        -- Continue with more moves if game not over
---        -- Human plays at cell 2 (top-right)
---        report "Human plays cell 2";
---        inPort <= "000000100";  -- Button 2
---        wait for 10 ns;
---        inPort <= "000000000";
---        wait for 10 ns;
-        
---        -- Human plays at cell 6 (bottom-left)
---        report "Human plays cell 6";
---        inPort <= "001000000";  -- Button 6
---        wait for 10 ns;
---        inPort <= "000000000";
---        wait for 10 ns;
-        
-        report "Game simulation complete - captured ";
+        report "Game simulation complete";
         wait;
     end process;
     
