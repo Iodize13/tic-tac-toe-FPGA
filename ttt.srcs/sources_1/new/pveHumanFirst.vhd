@@ -33,6 +33,8 @@ architecture structural of pveHumanFirst is
     signal human_move_latched : std_logic_vector(8 downto 0) := (others => '0');
     signal selected_cell : integer range 0 to 8 := 0;
     signal selected_move : std_logic_vector(8 downto 0) := (others => '0');
+    signal execute_debounced : std_logic := '0';
+    signal execute_prev : std_logic := '0';
     
     signal M_ai : std_logic_vector(8 downto 0);  -- X_AI (AI plays as O)
 
@@ -62,10 +64,34 @@ architecture structural of pveHumanFirst is
         port(clk: in std_logic; C0, C1, C2, C3, C4, C5, C6, C7, C8 : in std_logic_vector(1 downto 0);
              M_vec: out std_logic_vector(8 downto 0));
     end component;
+    
+    component button_debouncer
+        Generic (
+            CLK_FREQ    : integer := 100_000_000;
+            DEBOUNCE_MS : integer := 10
+        );
+        Port ( 
+            Clk      : in  STD_LOGIC;
+            BTN_In   : in  STD_LOGIC;
+            BTN_Out  : out STD_LOGIC
+        );
+    end component;
 
 begin
     rst <= reset;
     winState <= internalWin;
+
+    -- Debounce the execute button
+    EXEC_DEBOUNCE : button_debouncer
+        generic map (
+            CLK_FREQ    => 100_000_000,
+            DEBOUNCE_MS => 10
+        )
+        port map (
+            Clk     => clk,
+            BTN_In  => execute,
+            BTN_Out => execute_debounced
+        );
 
     -- AI component (AI plays as O, so uses X_AI)
     AI_INST : X_AI port map (
@@ -83,7 +109,7 @@ begin
                 sqrSel <= (others => '0');
                 turnReg <= '1';  -- X (human) starts
                 delay_cnt <= 0;
-                prev_execute <= '0';
+                execute_prev <= '0';
                 ai_move_latched <= (others => '0');
                 human_move_latched <= (others => '0');
                 selected_move <= (others => '0');
@@ -134,12 +160,12 @@ begin
                         if (selected_move and inPort) = "000000000" then
                             -- Switch released, go back to selection
                             state <= SELECT_CELL;
-                        elsif execute = '1' and prev_execute = '0' then
+                        elsif execute_debounced = '1' and execute_prev = '0' then
                             -- Execute only if switch still held
                             human_move_latched <= selected_move;
                             state <= HUMAN_TURN;
                         end if;
-                        prev_execute <= execute;
+                        execute_prev <= execute_debounced;
                         
                     when HUMAN_TURN =>
                         sqrSel <= human_move_latched;

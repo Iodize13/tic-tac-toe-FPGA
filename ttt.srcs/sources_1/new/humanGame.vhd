@@ -24,8 +24,9 @@ architecture structural of humanGame is
     
     type state_t is (IDLE, SELECT_CELL, EXECUTE_MOVE);
     signal state : state_t := IDLE;
-    signal prev_execute : std_logic := '0';
     signal selected_move : std_logic_vector(8 downto 0) := (others => '0');
+    signal execute_debounced : std_logic := '0';
+    signal execute_prev : std_logic := '0';
 
     function is_empty(cell_idx : integer; cells : std_logic_vector(17 downto 0)) return boolean is
     begin
@@ -64,10 +65,34 @@ architecture structural of humanGame is
             Turn      : in  std_logic
         );
     end component;
+    
+    component button_debouncer
+        Generic (
+            CLK_FREQ    : integer := 100_000_000;
+            DEBOUNCE_MS : integer := 10
+        );
+        Port ( 
+            Clk      : in  STD_LOGIC;
+            BTN_In   : in  STD_LOGIC;
+            BTN_Out  : out STD_LOGIC
+        );
+    end component;
 
 begin
     rst <= reset;
     winState <= internalWin;
+
+    -- Debounce the execute button
+    EXEC_DEBOUNCE : button_debouncer
+        generic map (
+            CLK_FREQ    => 100_000_000,
+            DEBOUNCE_MS => 10
+        )
+        port map (
+            Clk     => clk,
+            BTN_In  => execute,
+            BTN_Out => execute_debounced
+        );
 
     -- State machine with execute button
     process(clk)
@@ -77,7 +102,7 @@ begin
                 state <= IDLE;
                 sqrSel <= (others => '0');
                 turnReg <= '1';  -- X starts
-                prev_execute <= '0';
+                execute_prev <= '0';
                 selected_move <= (others => '0');
             else
                 sqrSel <= (others => '0');
@@ -124,13 +149,13 @@ begin
                         if (selected_move and inPort) = "000000000" then
                             -- Switch released, go back to selection
                             state <= SELECT_CELL;
-                        elsif execute = '1' and prev_execute = '0' then
+                        elsif execute_debounced = '1' and execute_prev = '0' then
                             -- Execute the move only if switch still held
                             sqrSel <= selected_move;
                             turnReg <= not turnReg;
                             state <= IDLE;
                         end if;
-                        prev_execute <= execute;
+                        execute_prev <= execute_debounced;
                         
                     when others =>
                         state <= IDLE;
