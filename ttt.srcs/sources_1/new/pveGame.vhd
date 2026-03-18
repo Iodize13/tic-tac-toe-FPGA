@@ -22,8 +22,6 @@ architecture structural of pveGame is
     signal turnReg     : std_logic := '1';  -- X starts
     signal colorSig    : std_logic_vector(8 downto 0); 
     signal internalWin : std_logic;
-    signal clk_count   : integer := 0;
-    signal heartbeat   : std_logic := '0';
     signal rst         : std_logic := '0';
     
     -- State machine
@@ -73,20 +71,7 @@ architecture structural of pveGame is
 
 begin
     rst <= reset;
-    winState <= internalWin or heartbeat;
-
-    -- Heartbeat
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if clk_count = 50000000 then
-                clk_count <= 0;
-                heartbeat <= not heartbeat;
-            else
-                clk_count <= clk_count + 1;
-            end if;
-        end if;
-    end process;
+    winState <= internalWin;
 
     -- AI components - both always calculate
     X_AI_INST : X_AI port map (
