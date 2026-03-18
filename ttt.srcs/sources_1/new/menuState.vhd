@@ -8,6 +8,7 @@ entity menuState is
 	   reset    : in  std_logic;
 	   clk      : in  std_logic;
 	   playFirst : in std_logic;
+	   execute  : in std_logic;
 	   hsync    : out std_logic;
 	   vsync    : out std_logic;
 	   rgb      : out std_logic_vector(11 downto 0);
@@ -24,6 +25,7 @@ architecture Behavioral of menuState is
 		inPort   : in  std_logic_vector(8 downto 0);
 		reset    : in  std_logic;
 		clk      : in  std_logic;
+		execute  : in  std_logic;
 		hsync    : out std_logic;
 		vsync    : out std_logic;
 		rgb      : out std_logic_vector(11 downto 0);
@@ -37,6 +39,7 @@ architecture Behavioral of menuState is
 		reset    : in  std_logic;
 		clk      : in  std_logic;
 		playFirst: in  std_logic;
+		execute  : in  std_logic;
 		hsync    : out std_logic;
 		vsync    : out std_logic;
 		rgb      : out std_logic_vector(11 downto 0);
@@ -74,10 +77,10 @@ begin
 
 --    report "enter the realm";
     HUMAN_INST: humanGame
-	port map (inPort => inPort, reset => reset, clk => clk, hsync => hsync0, vsync => vsync0, rgb => rgb0, winState => winState0);
+	port map (inPort => inPort, reset => reset, clk => clk, hsync => hsync0, vsync => vsync0, rgb => rgb0, winState => winState0, execute => execute);
 
     PVE_INST: gameLogic
-	port map (inPort => inPort, reset => reset, clk => clk, hsync => hsync1, vsync => vsync1, rgb => rgb1, winState => winState1, playFirst => playFirst);
+	port map (inPort => inPort, reset => reset, clk => clk, hsync => hsync1, vsync => vsync1, rgb => rgb1, winState => winState1, playFirst => playFirst, execute => execute);
     MENU_INST: process(clk)
     begin
 	if rising_edge(clk) then

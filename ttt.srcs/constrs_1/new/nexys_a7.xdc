@@ -35,6 +35,7 @@ set_property -dict {PACKAGE_PIN T8 IOSTANDARD LVCMOS33} [get_ports {inPort[8]}]
 set_property SEVERITY {Warning} [get_drc_checks NSTD-1]
 
 set_property -dict {PACKAGE_PIN V11 IOSTANDARD LVCMOS33} [get_ports {menuDisplay}]
+set_property -dict {PACKAGE_PIN V12 IOSTANDARD LVCMOS33} [get_ports {playFirst}]
 
 # LED output for win state
 set_property -dict {PACKAGE_PIN H17 IOSTANDARD LVCMOS33} [get_ports {winState}]
@@ -43,7 +44,8 @@ set_property -dict {PACKAGE_PIN H17 IOSTANDARD LVCMOS33} [get_ports {winState}]
 # set_property -dict {PACKAGE_PIN C12 IOSTANDARD LVCMOS33 PULLDOWN TRUE} [get_ports {reset}]
 set_property -dict {PACKAGE_PIN M18 IOSTANDARD LVCMOS33} [get_ports {reset}]
 set_property -dict {PACKAGE_PIN P17 IOSTANDARD LVCMOS33} [get_ports {btHuman}]
-set_property -dict {PACKAGE_PIN N17 IOSTANDARD LVCMOS33} [get_ports {btPve}]
+set_property -dict {PACKAGE_PIN N17 IOSTANDARD LVCMOS33} [get_ports {execute}]
+set_property -dict {PACKAGE_PIN M17 IOSTANDARD LVCMOS33} [get_ports {btPve}]
 
 ##VGA Connector
 set_property -dict { PACKAGE_PIN A3    IOSTANDARD LVCMOS33 } [get_ports { rgb[0] }]; #IO_L8N_T1_AD14N_35 Sch=vga_r[0]

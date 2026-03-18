@@ -4,6 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity gameLogic is
     port(
         inPort    : in  std_logic_vector(8 downto 0);
+        execute   : in  std_logic;  -- Execute button
         reset     : in  std_logic;
         clk       : in  std_logic;
         playFirst : in  std_logic;  -- '1' = Human plays first, '0' = AI plays first
@@ -31,6 +32,7 @@ architecture structural of gameLogic is
     component pveHumanFirst
         port(
             inPort    : in  std_logic_vector(8 downto 0);
+            execute   : in  std_logic;
             reset     : in  std_logic;
             clk       : in  std_logic;
             hsync     : out std_logic;
@@ -44,6 +46,7 @@ architecture structural of gameLogic is
     component pveAiFirst
         port(
             inPort    : in  std_logic_vector(8 downto 0);
+            execute   : in  std_logic;
             reset     : in  std_logic;
             clk       : in  std_logic;
             hsync     : out std_logic;
@@ -59,6 +62,7 @@ begin
     HUMAN_FIRST : pveHumanFirst
         port map (
             inPort   => inPort,
+            execute  => execute,
             reset    => reset,
             clk      => clk,
             hsync    => h_hsync,
@@ -71,6 +75,7 @@ begin
     AI_FIRST : pveAiFirst
         port map (
             inPort   => inPort,
+            execute  => execute,
             reset    => reset,
             clk      => clk,
             hsync    => a_hsync,

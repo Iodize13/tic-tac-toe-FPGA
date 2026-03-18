@@ -4,6 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity humanGame is
     port(
         inPort   : in  std_logic_vector(8 downto 0);
+        execute  : in  std_logic;  -- Execute button
         reset    : in  std_logic;
         clk      : in  std_logic;
         hsync    : out std_logic;
@@ -16,15 +17,22 @@ end humanGame;
 architecture structural of humanGame is
     signal sqrSel      : std_logic_vector(8 downto 0);
     signal cellGames   : std_logic_vector(17 downto 0);
-    signal prevIn      : std_logic_vector(8 downto 0) := (others => '0');
-    signal myIn        : std_logic_vector(8 downto 0) := (others => '0');
     signal turnReg     : std_logic := '1';
     signal colorSig    : std_logic_vector(8 downto 0); 
     signal internalWin : std_logic;
-    signal clk_count : integer := 0;
-    signal heartbeat : std_logic := '0';
-    signal rst : std_logic := '0';
+    signal clk_count   : integer := 0;
+    signal heartbeat   : std_logic := '0';
+    signal rst         : std_logic := '0';
     
+    type state_t is (IDLE, SELECT_CELL, EXECUTE_MOVE);
+    signal state : state_t := IDLE;
+    signal prev_execute : std_logic := '0';
+    signal selected_move : std_logic_vector(8 downto 0) := (others => '0');
+
+    function is_empty(cell_idx : integer; cells : std_logic_vector(17 downto 0)) return boolean is
+    begin
+        return cells(cell_idx*2+1 downto cell_idx*2) = "00";
+    end function;
 
     component Cell
         port(
@@ -46,7 +54,6 @@ architecture structural of humanGame is
         );
     end component;
     
-    -- phai
     component videoElement
         port(
             clk       : in  std_logic;
@@ -61,14 +68,13 @@ architecture structural of humanGame is
     end component;
 
 begin
-
     rst <= reset;
     winState <= internalWin or heartbeat;
 
+    -- Heartbeat
     process(clk)
     begin
         if rising_edge(clk) then
-
             if clk_count = 50000000 then
                 clk_count <= 0;
                 heartbeat <= not heartbeat;
@@ -78,45 +84,70 @@ begin
         end if;
     end process;
 
-    process(internalWin, inPort, cellGames)
-        variable inPort_popcount : integer range 0 to 9;
-    begin
-        sqrSel <= (others => '0');
-        
-        -- Count how many switches are pressed
-        inPort_popcount := 0;
-        for i in 0 to 8 loop
-            if inPort(i) = '1' then
-                inPort_popcount := inPort_popcount + 1;
-            end if;
-        end loop;
-        
-        -- Only process input if exactly one switch is pressed
-        if internalWin = '0' and inPort_popcount = 1 then 
-            if    (inPort(8) = '1' and cellGames(16) = '0') then sqrSel(8) <= '1';
-            elsif (inPort(7) = '1' and cellGames(14) = '0') then sqrSel(7) <= '1';
-            elsif (inPort(6) = '1' and cellGames(12) = '0') then sqrSel(6) <= '1';
-            elsif (inPort(5) = '1' and cellGames(10) = '0') then sqrSel(5) <= '1';
-            elsif (inPort(4) = '1' and cellGames(8) = '0')  then sqrSel(4) <= '1';
-            elsif (inPort(3) = '1' and cellGames(6) = '0')  then sqrSel(3) <= '1';
-            elsif (inPort(2) = '1' and cellGames(4) = '0')  then sqrSel(2) <= '1';
-            elsif (inPort(1) = '1' and cellGames(2) = '0')  then sqrSel(1) <= '1';
-            elsif (inPort(0) = '1' and cellGames(0) = '0')  then sqrSel(0) <= '1';
-            end if;
-        end if;
-    end process;
-     
+    -- State machine with execute button
     process(clk)
     begin
-        --อย่ากดปุ่มค้าง
-        if falling_edge(clk) then
-	    if reset = '1' then
-		turnReg <= '0';
-            elsif (prevIn /= myIn and myIn /= "000000000") then
-                turnReg <= not turnReg;
+        if rising_edge(clk) then
+            if reset = '1' then
+                state <= IDLE;
+                sqrSel <= (others => '0');
+                turnReg <= '1';  -- X starts
+                prev_execute <= '0';
+                selected_move <= (others => '0');
+            else
+                sqrSel <= (others => '0');
+                
+                case state is
+                    when IDLE =>
+                        if internalWin = '0' then
+                            state <= SELECT_CELL;
+                        end if;
+                        
+                    when SELECT_CELL =>
+                        -- Check which switch is pressed and if cell is empty
+                        if inPort(0) = '1' and is_empty(0, cellGames) then
+                            selected_move <= "000000001";
+                            state <= EXECUTE_MOVE;
+                        elsif inPort(1) = '1' and is_empty(1, cellGames) then
+                            selected_move <= "000000010";
+                            state <= EXECUTE_MOVE;
+                        elsif inPort(2) = '1' and is_empty(2, cellGames) then
+                            selected_move <= "000000100";
+                            state <= EXECUTE_MOVE;
+                        elsif inPort(3) = '1' and is_empty(3, cellGames) then
+                            selected_move <= "000001000";
+                            state <= EXECUTE_MOVE;
+                        elsif inPort(4) = '1' and is_empty(4, cellGames) then
+                            selected_move <= "000010000";
+                            state <= EXECUTE_MOVE;
+                        elsif inPort(5) = '1' and is_empty(5, cellGames) then
+                            selected_move <= "000100000";
+                            state <= EXECUTE_MOVE;
+                        elsif inPort(6) = '1' and is_empty(6, cellGames) then
+                            selected_move <= "001000000";
+                            state <= EXECUTE_MOVE;
+                        elsif inPort(7) = '1' and is_empty(7, cellGames) then
+                            selected_move <= "010000000";
+                            state <= EXECUTE_MOVE;
+                        elsif inPort(8) = '1' and is_empty(8, cellGames) then
+                            selected_move <= "100000000";
+                            state <= EXECUTE_MOVE;
+                        end if;
+                        
+                    when EXECUTE_MOVE =>
+                        -- Wait for execute button press
+                        if execute = '1' and prev_execute = '0' then
+                            -- Execute the move
+                            sqrSel <= selected_move;
+                            turnReg <= not turnReg;
+                            state <= IDLE;
+                        end if;
+                        prev_execute <= execute;
+                        
+                    when others =>
+                        state <= IDLE;
+                end case;
             end if;
-            prevIn <= myIn;
-            myIn   <= inPort;
         end if;
     end process;
      
@@ -137,5 +168,5 @@ begin
                 State => cellGames((i*2)+1 downto i*2)
             ); 
     end generate;
-               
+                
 end structural;

@@ -6,6 +6,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity pveAiFirst is
     port(
         inPort    : in  std_logic_vector(8 downto 0);
+        execute   : in  std_logic;  -- Execute button
         reset     : in  std_logic;
         clk       : in  std_logic;
         hsync     : out std_logic;
@@ -26,12 +27,13 @@ architecture structural of pveAiFirst is
     signal heartbeat   : std_logic := '0';
     signal rst         : std_logic := '0';
     
-    type state_t is (AI_FIRST, IDLE, HUMAN_TURN, AI_DELAY, AI_TURN, GAME_OVER);
+    type state_t is (AI_FIRST, IDLE, SELECT_CELL, EXECUTE_WAIT, HUMAN_TURN, AI_DELAY, AI_TURN, GAME_OVER);
     signal state : state_t := AI_FIRST;
     signal delay_cnt : integer range 0 to 31 := 0;
-    signal prev_inPort : std_logic_vector(8 downto 0) := (others => '0');
+    signal prev_execute : std_logic := '0';
     signal ai_move_latched : std_logic_vector(8 downto 0) := (others => '0');
     signal human_move_latched : std_logic_vector(8 downto 0) := (others => '0');
+    signal selected_cell : integer range 0 to 8 := 0;
     
     signal M_ai : std_logic_vector(8 downto 0);  -- O_AI (AI plays as X)
 
@@ -88,15 +90,14 @@ begin
 
     -- State machine
     process(clk)
-        variable inPort_diff : std_logic_vector(8 downto 0);
     begin
         if rising_edge(clk) then
             if reset = '1' then
                 state <= AI_FIRST;
                 sqrSel <= (others => '0');
-                turnReg <= '0';  -- X (AI) starts
+                turnReg <= '1';  -- X (AI) starts
                 delay_cnt <= 0;
-                prev_inPort <= (others => '0');
+                prev_execute <= '0';
                 ai_move_latched <= (others => '0');
                 human_move_latched <= (others => '0');
             else
@@ -127,30 +128,59 @@ begin
                         if internalWin = '1' then
                             state <= GAME_OVER;
                         else
-                            inPort_diff := inPort and (not prev_inPort);
-                            if inPort_diff /= "000000000" then
-                                if inPort_diff(0) = '1' and is_empty(0, cellGames) then
-                                    human_move_latched <= "000000001"; state <= HUMAN_TURN;
-                                elsif inPort_diff(1) = '1' and is_empty(1, cellGames) then
-                                    human_move_latched <= "000000010"; state <= HUMAN_TURN;
-                                elsif inPort_diff(2) = '1' and is_empty(2, cellGames) then
-                                    human_move_latched <= "000000100"; state <= HUMAN_TURN;
-                                elsif inPort_diff(3) = '1' and is_empty(3, cellGames) then
-                                    human_move_latched <= "000001000"; state <= HUMAN_TURN;
-                                elsif inPort_diff(4) = '1' and is_empty(4, cellGames) then
-                                    human_move_latched <= "000010000"; state <= HUMAN_TURN;
-                                elsif inPort_diff(5) = '1' and is_empty(5, cellGames) then
-                                    human_move_latched <= "000100000"; state <= HUMAN_TURN;
-                                elsif inPort_diff(6) = '1' and is_empty(6, cellGames) then
-                                    human_move_latched <= "001000000"; state <= HUMAN_TURN;
-                                elsif inPort_diff(7) = '1' and is_empty(7, cellGames) then
-                                    human_move_latched <= "010000000"; state <= HUMAN_TURN;
-                                elsif inPort_diff(8) = '1' and is_empty(8, cellGames) then
-                                    human_move_latched <= "100000000"; state <= HUMAN_TURN;
-                                end if;
-                            end if;
-                            prev_inPort <= inPort;
+                            state <= SELECT_CELL;
                         end if;
+                        
+                    when SELECT_CELL =>
+                        -- Check which switch is pressed (priority order)
+                        if inPort(0) = '1' and is_empty(0, cellGames) then
+                            selected_cell <= 0;
+                            state <= EXECUTE_WAIT;
+                        elsif inPort(1) = '1' and is_empty(1, cellGames) then
+                            selected_cell <= 1;
+                            state <= EXECUTE_WAIT;
+                        elsif inPort(2) = '1' and is_empty(2, cellGames) then
+                            selected_cell <= 2;
+                            state <= EXECUTE_WAIT;
+                        elsif inPort(3) = '1' and is_empty(3, cellGames) then
+                            selected_cell <= 3;
+                            state <= EXECUTE_WAIT;
+                        elsif inPort(4) = '1' and is_empty(4, cellGames) then
+                            selected_cell <= 4;
+                            state <= EXECUTE_WAIT;
+                        elsif inPort(5) = '1' and is_empty(5, cellGames) then
+                            selected_cell <= 5;
+                            state <= EXECUTE_WAIT;
+                        elsif inPort(6) = '1' and is_empty(6, cellGames) then
+                            selected_cell <= 6;
+                            state <= EXECUTE_WAIT;
+                        elsif inPort(7) = '1' and is_empty(7, cellGames) then
+                            selected_cell <= 7;
+                            state <= EXECUTE_WAIT;
+                        elsif inPort(8) = '1' and is_empty(8, cellGames) then
+                            selected_cell <= 8;
+                            state <= EXECUTE_WAIT;
+                        end if;
+                        
+                    when EXECUTE_WAIT =>
+                        -- Wait for execute button
+                        if execute = '1' and prev_execute = '0' then
+                            -- Convert selected cell to move
+                            case selected_cell is
+                                when 0 => human_move_latched <= "000000001";
+                                when 1 => human_move_latched <= "000000010";
+                                when 2 => human_move_latched <= "000000100";
+                                when 3 => human_move_latched <= "000001000";
+                                when 4 => human_move_latched <= "000010000";
+                                when 5 => human_move_latched <= "000100000";
+                                when 6 => human_move_latched <= "001000000";
+                                when 7 => human_move_latched <= "010000000";
+                                when 8 => human_move_latched <= "100000000";
+                                when others => null;
+                            end case;
+                            state <= HUMAN_TURN;
+                        end if;
+                        prev_execute <= execute;
                         
                     when HUMAN_TURN =>
                         sqrSel <= human_move_latched;
