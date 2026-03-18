@@ -13,6 +13,7 @@ architecture Behavioral of gameLogic_tb is
             inPort   : in  std_logic_vector(8 downto 0);
             reset    : in  std_logic;
             clk      : in  std_logic;
+	    playFirst : in std_logic;
             hsync    : out std_logic;
             vsync    : out std_logic;
             rgb      : out std_logic_vector(11 downto 0);
@@ -33,6 +34,7 @@ architecture Behavioral of gameLogic_tb is
     -- Track game state
     signal move_count : integer := 0;
     signal game_over  : boolean := false;
+    signal playF_tb   : std_logic := '0';
     
 begin
     UUT: gameLogic
@@ -43,7 +45,8 @@ begin
             hsync => hsync,
             vsync => vsync,
             rgb => rgb,
-            winState => winState
+            winState => winState,
+	    playFirst => playF_tb
         );
 
     clk_process: process
@@ -58,17 +61,18 @@ begin
     stim_proc: process
     begin
         reset <= '1';
+	playF_tb <= '1';
         wait for 20 ns;
         reset <= '0';
-        wait for 20 ns;
+        wait for 200 ns;
         
         -- Human plays at cell 0 (top-left)
         report "Human plays cell 8";
-        inPort <= "000010000";  -- Button 0
-        wait for 200 ns;
         inPort <= "000000100";
         wait for 200 ns;
         inPort <= "100000000";
+        wait for 200 ns;
+        -- inPort <= "000010000";  -- Button 0
         -- wait for 200 ns;
         
         -- Human plays at cell 4 (center)

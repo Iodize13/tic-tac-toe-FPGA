@@ -1,297 +1,90 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
 
 entity gameLogic is
     port(
         inPort    : in  std_logic_vector(8 downto 0);
         reset     : in  std_logic;
         clk       : in  std_logic;
-        playFirst : in  std_logic;  -- '1' = Human plays first (as X), '0' = AI plays first (human as O)
+        playFirst : in  std_logic;  -- '1' = Human plays first, '0' = AI plays first
         hsync     : out std_logic;
         vsync     : out std_logic;
         rgb       : out std_logic_vector(11 downto 0);
         winState  : out std_logic;
-	 cellTemp  : out std_logic_vector(17 downto 0)
+        cellTemp  : out std_logic_vector(17 downto 0)
     );
-end gameLogic; 
+end gameLogic;
 
 architecture structural of gameLogic is
-    signal sqrSel      : std_logic_vector(8 downto 0);
-    signal cellGames   : std_logic_vector(17 downto 0);
-    signal prevIn      : std_logic_vector(8 downto 0) := (others => '0');
-    signal myIn        : std_logic_vector(8 downto 0) := (others => '0');
-    signal turnReg     : std_logic := '1';  -- X starts first (AI plays as X)
-    signal colorSig    : std_logic_vector(8 downto 0); 
-    signal internalWin : std_logic;
-    signal clk_count   : integer := 0;
-    signal heartbeat   : std_logic := '0';
-    signal rst         : std_logic := '0';
+    -- Signals for pveHumanFirst (human plays first)
+    signal h_hsync, h_vsync : std_logic;
+    signal h_rgb : std_logic_vector(11 downto 0);
+    signal h_winState : std_logic;
+    signal h_cellTemp : std_logic_vector(17 downto 0);
     
-    -- State machine signals
-    type state_t is (AI_FIRST, IDLE, HUMAN_PLAY, AI_DELAY, AI_PLAY, GAME_OVER);
-    signal state : state_t := AI_FIRST;
-    signal delay_cnt : integer range 0 to 10 := 0;
-    signal prev_inPort : std_logic_vector(8 downto 0) := (others => '0');
-    signal ai_move_latched : std_logic_vector(8 downto 0) := (others => '0');
-    signal move_to_play : std_logic_vector(8 downto 0) := (others => '0');
-    
-    signal M_x_ai      : std_logic_vector(8 downto 0);  -- X_AI output (AI plays as O)
-    signal M_o_ai      : std_logic_vector(8 downto 0);  -- O_AI output (AI plays as X)
-    signal M_inter     : std_logic_vector(8 downto 0);  -- Mux output
-    signal ai_plays_x  : std_logic;  -- '1' when AI plays as X, '0' when AI plays as O
+    -- Signals for pveAiFirst (AI plays first)
+    signal a_hsync, a_vsync : std_logic;
+    signal a_rgb : std_logic_vector(11 downto 0);
+    signal a_winState : std_logic;
+    signal a_cellTemp : std_logic_vector(17 downto 0);
 
-    -- Function to check if a cell is empty (00)
-    function is_empty(cell_idx : integer; cells : std_logic_vector(17 downto 0)) return boolean is
-    begin
-        return cells(cell_idx*2+1 downto cell_idx*2) = "00";
-    end function;
-
-    component Cell
+    component pveHumanFirst
         port(
-            clk  : in  std_logic;
-            sel   : in  std_logic;
-            turn  : in  std_logic;
-            reset : in  std_logic;
-            State : out std_logic_vector(1 downto 0)
-        );
-    end component;
-    
-    component gameState
-        port(
-            clk       : in  std_logic;
+            inPort    : in  std_logic_vector(8 downto 0);
             reset     : in  std_logic;
-            cellState : in  std_logic_vector(17 downto 0);
-            winState  : out std_logic;
-            colorCell : out std_logic_vector(8 downto 0)
-        );
-    end component;
-    
-    component videoElement
-        port(
             clk       : in  std_logic;
-            reset     : in  std_logic;
             hsync     : out std_logic;
             vsync     : out std_logic;
-            rgb       : out std_logic_vector(11 downto 0); 
-            Cells     : in  std_logic_vector(17 downto 0);
-            Color     : in  std_logic_vector(8 downto 0);
-            Turn      : in  std_logic
+            rgb       : out std_logic_vector(11 downto 0);
+            winState  : out std_logic;
+            cellTemp  : out std_logic_vector(17 downto 0)
         );
     end component;
     
-    component X_AI
+    component pveAiFirst
         port(
-	    clk: in std_logic;
-            C0, C1, C2, C3, C4, C5, C6, C7, C8 : in std_logic_vector(1 downto 0);
-            M_vec: out std_logic_vector(8 downto 0)
-        );
-    end component;
-    
-    component O_AI
-        port(
-	    clk: in std_logic;
-            C0, C1, C2, C3, C4, C5, C6, C7, C8 : in std_logic_vector(1 downto 0);
-            M_vec: out std_logic_vector(8 downto 0)
+            inPort    : in  std_logic_vector(8 downto 0);
+            reset     : in  std_logic;
+            clk       : in  std_logic;
+            hsync     : out std_logic;
+            vsync     : out std_logic;
+            rgb       : out std_logic_vector(11 downto 0);
+            winState  : out std_logic;
+            cellTemp  : out std_logic_vector(17 downto 0)
         );
     end component;
 
 begin
-
-    rst <= reset;
-    winState <= internalWin or heartbeat;
-
-    -- Heartbeat counter
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if clk_count = 50000000 then
-                clk_count <= 0;
-                heartbeat <= not heartbeat;
-            else
-                clk_count <= clk_count + 1;
-            end if;
-        end if;
-    end process;
-
-    -- AI components
-    X_AI_INST : X_AI
+    -- Instantiate both game modules
+    HUMAN_FIRST : pveHumanFirst
         port map (
-	    clk => clk,
-            C0 => cellGames(1 downto 0),
-            C1 => cellGames(3 downto 2),
-            C2 => cellGames(5 downto 4),
-            C3 => cellGames(7 downto 6),
-            C4 => cellGames(9 downto 8),
-            C5 => cellGames(11 downto 10),
-            C6 => cellGames(13 downto 12),
-            C7 => cellGames(15 downto 14),
-            C8 => cellGames(17 downto 16),
-            M_vec => M_x_ai
-        );
-        
-    O_AI_INST : O_AI
-        port map (
-	    clk => clk,
-            C0 => cellGames(1 downto 0),
-            C1 => cellGames(3 downto 2),
-            C2 => cellGames(5 downto 4),
-            C3 => cellGames(7 downto 6),
-            C4 => cellGames(9 downto 8),
-            C5 => cellGames(11 downto 10),
-            C6 => cellGames(13 downto 12),
-            C7 => cellGames(15 downto 14),
-            C8 => cellGames(17 downto 16),
-            M_vec => M_o_ai
+            inPort   => inPort,
+            reset    => reset,
+            clk      => clk,
+            hsync    => h_hsync,
+            vsync    => h_vsync,
+            rgb      => h_rgb,
+            winState => h_winState,
+            cellTemp => h_cellTemp
         );
     
-    -- Mux to select AI output based on who AI is playing as
-    ai_plays_x <= not playFirst;  -- AI plays X when human doesn't play first
-    M_inter <= M_o_ai when ai_plays_x = '1' else M_x_ai;
-
-    -- Main state machine
-    process(clk)
-        variable human_move : std_logic_vector(8 downto 0);
-        variable move_valid : boolean;
-    begin
-        if rising_edge(clk) then
-            if reset = '1' then
-                if playFirst = '1' then
-                    state <= IDLE;  -- Human plays first as X
-                else
-                    state <= AI_FIRST;  -- AI plays first as X
-                end if;
-                sqrSel <= (others => '0');
-                turnReg <= '1';  -- X always starts
-                delay_cnt <= 0;
-                prev_inPort <= (others => '0');
-                ai_move_latched <= (others => '0');
-                move_to_play <= (others => '0');
-            else
-                -- Default: no move
-                sqrSel <= (others => '0');
-                
-                case state is
-                    when AI_FIRST =>
-                        -- AI plays first (as X)
-                        if delay_cnt < 10 then
-                            delay_cnt <= delay_cnt + 1;
-                        elsif delay_cnt = 10 then
-                            -- Latch AI move
-                            ai_move_latched <= M_inter;
-                            delay_cnt <= delay_cnt + 1;
-                        elsif delay_cnt = 11 then
-                            -- Execute move
-                            sqrSel <= ai_move_latched;
-                            delay_cnt <= delay_cnt + 1;
-                        elsif delay_cnt = 12 then
-                            -- Clear sel and switch to O (human)
-                            sqrSel <= (others => '0');
-                            turnReg <= '0';
-                            delay_cnt <= 0;
-                            state <= IDLE;
-                        end if;
-                        
-                    when IDLE =>
-                        -- Check for win first
-                        if internalWin = '1' then
-                            state <= GAME_OVER;
-                        elsif inPort /= prev_inPort then
-                            -- Input changed - check if valid move
-                            human_move := (others => '0');
-                            move_valid := false;
-                            
-                            -- Check which cell is selected and if empty
-                            if inPort(0) = '1' and is_empty(0, cellGames) then
-                                human_move(0) := '1'; move_valid := true;
-                            elsif inPort(1) = '1' and is_empty(1, cellGames) then
-                                human_move(1) := '1'; move_valid := true;
-                            elsif inPort(2) = '1' and is_empty(2, cellGames) then
-                                human_move(2) := '1'; move_valid := true;
-                            elsif inPort(3) = '1' and is_empty(3, cellGames) then
-                                human_move(3) := '1'; move_valid := true;
-                            elsif inPort(4) = '1' and is_empty(4, cellGames) then
-                                human_move(4) := '1'; move_valid := true;
-                            elsif inPort(5) = '1' and is_empty(5, cellGames) then
-                                human_move(5) := '1'; move_valid := true;
-                            elsif inPort(6) = '1' and is_empty(6, cellGames) then
-                                human_move(6) := '1'; move_valid := true;
-                            elsif inPort(7) = '1' and is_empty(7, cellGames) then
-                                human_move(7) := '1'; move_valid := true;
-                            elsif inPort(8) = '1' and is_empty(8, cellGames) then
-                                human_move(8) := '1'; move_valid := true;
-                            end if;
-                            
-                            if move_valid then
-                                move_to_play <= human_move;
-                                state <= HUMAN_PLAY;
-                            end if;
-                        end if;
-                        prev_inPort <= inPort;
-                        
-                    when HUMAN_PLAY =>
-                        -- Execute human move
-                        sqrSel <= move_to_play;
-                        -- Toggle turn
-                        turnReg <= not turnReg;
-                        -- Start delay
-                        delay_cnt <= 0;
-                        state <= AI_DELAY;
-                        
-                    when AI_DELAY =>
-                        -- Wait 10 cycles
-                        if delay_cnt < 10 then
-                            delay_cnt <= delay_cnt + 1;
-                        else
-			-- Latch AI move immediately while board state is stable
-			    ai_move_latched <= M_inter;
-                            state <= AI_PLAY;
-                        end if;
-                        
-                    when AI_PLAY =>
-                        if internalWin = '1' then
-                            state <= GAME_OVER;
-			else
-                        -- Execute AI move
-			    sqrSel <= ai_move_latched;
-			-- Toggle turn back
-			    turnReg <= not turnReg;
-			-- Go back to idle to wait for next move
-			    state <= IDLE;
-			end if;
-                        
-                    when GAME_OVER =>
-                        -- Stay in game over state
-                        -- Reset required to start new game
-                        null;
-                        
-                    when others =>
-                        state <= IDLE;
-                end case;
-            end if;
-        end if;
-    end process;
-     
-    STATE_INST : gameState 
-        port map (clk => clk, reset => rst, cellState => cellGames, winState => internalWin, colorCell => colorSig);
-
-    VGA_INST : videoElement
-        port map (clk => clk, reset => rst, hsync => hsync, vsync => vsync, 
-                  rgb => rgb, Cells => cellGames, Color => colorSig, Turn => turnReg);
+    AI_FIRST : pveAiFirst
+        port map (
+            inPort   => inPort,
+            reset    => reset,
+            clk      => clk,
+            hsync    => a_hsync,
+            vsync    => a_vsync,
+            rgb      => a_rgb,
+            winState => a_winState,
+            cellTemp => a_cellTemp
+        );
     
+    -- Mux to select which module's output to use
+    hsync    <= h_hsync when playFirst = '1' else a_hsync;
+    vsync    <= h_vsync when playFirst = '1' else a_vsync;
+    rgb      <= h_rgb when playFirst = '1' else a_rgb;
+    winState <= h_winState when playFirst = '1' else a_winState;
+    cellTemp <= h_cellTemp when playFirst = '1' else a_cellTemp;
 
-    GEN_CELLS: for i in 0 to 8 generate
-        CELL_I : Cell
-            port map(
-                clk   => clk,
-                reset => rst,
-                turn  => turnReg,
-                sel   => sqrSel(i),
-                State => cellGames((i*2)+1 downto i*2)
-            ); 
-    end generate;
-
-    cellTemp <= cellGames;
-               
 end structural;
-

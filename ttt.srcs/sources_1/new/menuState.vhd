@@ -7,11 +7,11 @@ entity menuState is
 	   inPort   : in  std_logic_vector(8 downto 0);
 	   reset    : in  std_logic;
 	   clk      : in  std_logic;
+	   playFirst : in std_logic;
 	   hsync    : out std_logic;
 	   vsync    : out std_logic;
 	   rgb      : out std_logic_vector(11 downto 0);
 	   winState : out std_logic;
-	   playFirst : out std_logic;
 	   menuDisplay : out std_logic
        );
 end menuState;
@@ -36,6 +36,7 @@ architecture Behavioral of menuState is
 		inPort   : in  std_logic_vector(8 downto 0);
 		reset    : in  std_logic;
 		clk      : in  std_logic;
+		playFirst: in  std_logic;
 		hsync    : out std_logic;
 		vsync    : out std_logic;
 		rgb      : out std_logic_vector(11 downto 0);
@@ -88,12 +89,13 @@ begin
 		    when MENU =>
 			if btHuman = '1' then
 			    curState <= HUMAN;
+			    menuDisplay <= '0';
 			    report "case: 0";
 			elsif btPve = '1' then
 			    curState <= PVE;
+			    menuDisplay <= '0';
 			    report "case: 1";
 			end if;
-			menuDisplay <= '0';
 		    when HUMAN =>
 		    -- TODO: implement with Human mode
 
