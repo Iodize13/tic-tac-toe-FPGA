@@ -39,46 +39,7 @@ begin
     -------------------------------------------------
 
     -- Rows
-    if (C0="11" and C1="11" and C2="00") then M2<='1';
-    elsif (C0="11" and C2="11" and C1="00") then M1<='1';
-    elsif (C1="11" and C2="11" and C0="00") then M0<='1';
-
-    elsif (C3="11" and C4="11" and C5="00") then M5<='1';
-    elsif (C3="11" and C5="11" and C4="00") then M4<='1';
-    elsif (C4="11" and C5="11" and C3="00") then M3<='1';
-
-    elsif (C6="11" and C7="11" and C8="00") then M8<='1';
-    elsif (C6="11" and C8="11" and C7="00") then M7<='1';
-    elsif (C7="11" and C8="11" and C6="00") then M6<='1';
-
-    -- Columns
-    elsif (C0="11" and C3="11" and C6="00") then M6<='1';
-    elsif (C0="11" and C6="11" and C3="00") then M3<='1';
-    elsif (C3="11" and C6="11" and C0="00") then M0<='1';
-
-    elsif (C1="11" and C4="11" and C7="00") then M7<='1';
-    elsif (C1="11" and C7="11" and C4="00") then M4<='1';
-    elsif (C4="11" and C7="11" and C1="00") then M1<='1';
-
-    elsif (C2="11" and C5="11" and C8="00") then M8<='1';
-    elsif (C2="11" and C8="11" and C5="00") then M5<='1';
-    elsif (C5="11" and C8="11" and C2="00") then M2<='1';
-
-    -- Diagonals
-    elsif (C0="11" and C4="11" and C8="00") then M8<='1';
-    elsif (C0="11" and C8="11" and C4="00") then M4<='1';
-    elsif (C4="11" and C8="11" and C0="00") then M0<='1';
-
-    elsif (C2="11" and C4="11" and C6="00") then M6<='1';
-    elsif (C2="11" and C6="11" and C4="00") then M4<='1';
-    elsif (C4="11" and C6="11" and C2="00") then M2<='1';
-
-    -------------------------------------------------
-    -- 2) Block X (01)
-    -------------------------------------------------
-
-    -- Rows
-    elsif (C0="01" and C1="01" and C2="00") then M2<='1';
+    if (C0="01" and C1="01" and C2="00") then M2<='1';
     elsif (C0="01" and C2="01" and C1="00") then M1<='1';
     elsif (C1="01" and C2="01" and C0="00") then M0<='1';
 
@@ -111,6 +72,45 @@ begin
     elsif (C2="01" and C4="01" and C6="00") then M6<='1';
     elsif (C2="01" and C6="01" and C4="00") then M4<='1';
     elsif (C4="01" and C6="01" and C2="00") then M2<='1';
+
+    -------------------------------------------------
+    -- 2) Block X (11)
+    -------------------------------------------------
+
+    -- Rows
+    elsif (C0="11" and C1="11" and C2="00") then M2<='1';
+    elsif (C0="11" and C2="11" and C1="00") then M1<='1';
+    elsif (C1="11" and C2="11" and C0="00") then M0<='1';
+
+    elsif (C3="11" and C4="11" and C5="00") then M5<='1';
+    elsif (C3="11" and C5="11" and C4="00") then M4<='1';
+    elsif (C4="11" and C5="11" and C3="00") then M3<='1';
+
+    elsif (C6="11" and C7="11" and C8="00") then M8<='1';
+    elsif (C6="11" and C8="11" and C7="00") then M7<='1';
+    elsif (C7="11" and C8="11" and C6="00") then M6<='1';
+
+    -- Columns
+    elsif (C0="11" and C3="11" and C6="00") then M6<='1';
+    elsif (C0="11" and C6="11" and C3="00") then M3<='1';
+    elsif (C3="11" and C6="11" and C0="00") then M0<='1';
+
+    elsif (C1="11" and C4="11" and C7="00") then M7<='1';
+    elsif (C1="11" and C7="11" and C4="00") then M4<='1';
+    elsif (C4="11" and C7="11" and C1="00") then M1<='1';
+
+    elsif (C2="11" and C5="11" and C8="00") then M8<='1';
+    elsif (C2="11" and C8="11" and C5="00") then M5<='1';
+    elsif (C5="11" and C8="11" and C2="00") then M2<='1';
+
+    -- Diagonals
+    elsif (C0="11" and C4="11" and C8="00") then M8<='1';
+    elsif (C0="11" and C8="11" and C4="00") then M4<='1';
+    elsif (C4="11" and C8="11" and C0="00") then M0<='1';
+
+    elsif (C2="11" and C4="11" and C6="00") then M6<='1';
+    elsif (C2="11" and C6="11" and C4="00") then M4<='1';
+    elsif (C4="11" and C6="11" and C2="00") then M2<='1';
 
     -------------------------------------------------
     -- 3) Center
