@@ -34,6 +34,7 @@ architecture structural of pveHumanFirst is
     signal ai_move_latched : std_logic_vector(8 downto 0) := (others => '0');
     signal human_move_latched : std_logic_vector(8 downto 0) := (others => '0');
     signal selected_cell : integer range 0 to 8 := 0;
+    signal selected_move : std_logic_vector(8 downto 0) := (others => '0');
     
     signal M_ai : std_logic_vector(8 downto 0);  -- X_AI (AI plays as O)
 
@@ -100,6 +101,7 @@ begin
                 prev_execute <= '0';
                 ai_move_latched <= (others => '0');
                 human_move_latched <= (others => '0');
+                selected_move <= (others => '0');
             else
                 sqrSel <= (others => '0');
                 
@@ -114,50 +116,42 @@ begin
                     when SELECT_CELL =>
                         -- Check which switch is pressed (priority order)
                         if inPort(0) = '1' and is_empty(0, cellGames) then
-                            selected_cell <= 0;
+                            selected_cell <= 0; selected_move <= "000000001";
                             state <= EXECUTE_WAIT;
                         elsif inPort(1) = '1' and is_empty(1, cellGames) then
-                            selected_cell <= 1;
+                            selected_cell <= 1; selected_move <= "000000010";
                             state <= EXECUTE_WAIT;
                         elsif inPort(2) = '1' and is_empty(2, cellGames) then
-                            selected_cell <= 2;
+                            selected_cell <= 2; selected_move <= "000000100";
                             state <= EXECUTE_WAIT;
                         elsif inPort(3) = '1' and is_empty(3, cellGames) then
-                            selected_cell <= 3;
+                            selected_cell <= 3; selected_move <= "000001000";
                             state <= EXECUTE_WAIT;
                         elsif inPort(4) = '1' and is_empty(4, cellGames) then
-                            selected_cell <= 4;
+                            selected_cell <= 4; selected_move <= "000010000";
                             state <= EXECUTE_WAIT;
                         elsif inPort(5) = '1' and is_empty(5, cellGames) then
-                            selected_cell <= 5;
+                            selected_cell <= 5; selected_move <= "000100000";
                             state <= EXECUTE_WAIT;
                         elsif inPort(6) = '1' and is_empty(6, cellGames) then
-                            selected_cell <= 6;
+                            selected_cell <= 6; selected_move <= "001000000";
                             state <= EXECUTE_WAIT;
                         elsif inPort(7) = '1' and is_empty(7, cellGames) then
-                            selected_cell <= 7;
+                            selected_cell <= 7; selected_move <= "010000000";
                             state <= EXECUTE_WAIT;
                         elsif inPort(8) = '1' and is_empty(8, cellGames) then
-                            selected_cell <= 8;
+                            selected_cell <= 8; selected_move <= "100000000";
                             state <= EXECUTE_WAIT;
                         end if;
                         
                     when EXECUTE_WAIT =>
-                        -- Wait for execute button
-                        if execute = '1' and prev_execute = '0' then
-                            -- Convert selected cell to move
-                            case selected_cell is
-                                when 0 => human_move_latched <= "000000001";
-                                when 1 => human_move_latched <= "000000010";
-                                when 2 => human_move_latched <= "000000100";
-                                when 3 => human_move_latched <= "000001000";
-                                when 4 => human_move_latched <= "000010000";
-                                when 5 => human_move_latched <= "000100000";
-                                when 6 => human_move_latched <= "001000000";
-                                when 7 => human_move_latched <= "010000000";
-                                when 8 => human_move_latched <= "100000000";
-                                when others => null;
-                            end case;
+                        -- Check if switch is still held
+                        if (selected_move and inPort) = "000000000" then
+                            -- Switch released, go back to selection
+                            state <= SELECT_CELL;
+                        elsif execute = '1' and prev_execute = '0' then
+                            -- Execute only if switch still held
+                            human_move_latched <= selected_move;
                             state <= HUMAN_TURN;
                         end if;
                         prev_execute <= execute;

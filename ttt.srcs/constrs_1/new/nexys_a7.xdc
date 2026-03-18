@@ -35,7 +35,7 @@ set_property -dict {PACKAGE_PIN T8 IOSTANDARD LVCMOS33} [get_ports {inPort[8]}]
 set_property SEVERITY {Warning} [get_drc_checks NSTD-1]
 
 set_property -dict {PACKAGE_PIN V11 IOSTANDARD LVCMOS33} [get_ports {menuDisplay}]
-set_property -dict {PACKAGE_PIN V12 IOSTANDARD LVCMOS33} [get_ports {playFirst}]
+set_property -dict {PACKAGE_PIN V10 IOSTANDARD LVCMOS33} [get_ports {playFirst}]
 
 # LED output for win state
 set_property -dict {PACKAGE_PIN H17 IOSTANDARD LVCMOS33} [get_ports {winState}]

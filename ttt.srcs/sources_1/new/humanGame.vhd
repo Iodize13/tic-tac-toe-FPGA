@@ -135,9 +135,12 @@ begin
                         end if;
                         
                     when EXECUTE_MOVE =>
-                        -- Wait for execute button press
-                        if execute = '1' and prev_execute = '0' then
-                            -- Execute the move
+                        -- Check if switch is still held
+                        if (selected_move and inPort) = "000000000" then
+                            -- Switch released, go back to selection
+                            state <= SELECT_CELL;
+                        elsif execute = '1' and prev_execute = '0' then
+                            -- Execute the move only if switch still held
                             sqrSel <= selected_move;
                             turnReg <= not turnReg;
                             state <= IDLE;
