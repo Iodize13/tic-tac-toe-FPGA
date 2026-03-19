@@ -11,48 +11,45 @@ entity Cell is
     );
 end Cell;
 
-architecture Behavioral of Cell is
+architecture gate_level of Cell is
 
-    type states is (N, X, O);
-    signal PS, NS : states;
+    component DFF_Gate
+        Port (
+            clk : in  STD_LOGIC;
+            D   : in  STD_LOGIC;
+            Q   : out STD_LOGIC
+        );
+    end component;
+
+    -- Internal signals
+    signal Q1, Q0 : STD_LOGIC;
+    signal D0_NS, D1_NS: STD_LOGIC;
 
 begin
+    -- Next state logic (combinational)
+    -- D0_NS = (not Reset and Sel) or (not Reset and Q1) or (not Reset and Q0)
+    D0_NS <= ((not Reset) and Sel) or ((not Reset) and Q1) or ((not Reset) and Q0);
+    
+    -- D1_NS = (not Reset and Sel and Turn and not Q1 and not Q0) or (not Reset and Q1 and Q0)
+    D1_NS <= ((not Reset) and Sel and Turn and (not Q1) and (not Q0)) or ((not Reset) and Q1 and Q0);
+    
+    -- State register (D flip-flops)
+    FF0: DFF_Gate
+        port map (
+            clk => clk,
+            D => D0_NS,
+            Q => Q0
+        );
 
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if Reset = '1' then
-                PS <= N;
-            else
-                PS <= NS;
-            end if;
-        end if;
-    end process;
+    FF1: DFF_Gate
+        port map (
+            clk => clk,
+            D => D1_NS,
+            Q => Q1
+        );
 
-    process(PS, Sel, Turn)
-    begin
-        case PS is
-        
-            when N =>
-                State <= "00";
-                
-                if (Sel = '1' and Turn = '0') then
-                    NS <= X;
-                elsif (Sel = '1' and Turn = '1') then
-                    NS <= O;
-                else
-                    NS <= PS;
-                end if;
-                
-            when X =>
-                State <= "01";
-                NS <= PS;
-                
-            when O =>
-                State <= "11";
-                NS <= PS;
-                
-        end case;
-    end process;
+    -- Output mapping
+    -- State(0) = Q0, State(1) = Q1
+    State <= Q1 & Q0;
 
-end Behavioral;
+end gate_level;
