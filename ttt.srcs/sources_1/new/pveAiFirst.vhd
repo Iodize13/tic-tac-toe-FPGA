@@ -94,17 +94,17 @@ begin
 
     -- Debounce the execute button
     EXEC_DEBOUNCE : 
-	-- button_debouncer
-        -- generic map (
-        --     CLK_FREQ    => 100_000_000,
-        --     DEBOUNCE_MS => 10
-        -- )
-        -- port map (
-        --     Clk     => clk,
-        --     BTN_In  => execute,
-        --     BTN_Out => execute_debounced
-        -- );
-	execute_debounced <= execute;
+	button_debouncer
+        generic map (
+            CLK_FREQ    => 100_000_000,
+            DEBOUNCE_MS => 10
+        )
+        port map (
+            Clk     => clk,
+            BTN_In  => execute,
+            BTN_Out => execute_debounced
+        );
+	-- execute_debounced <= execute;
 
     -- Input decoder for switch selection
     DECODER : inputDecoder

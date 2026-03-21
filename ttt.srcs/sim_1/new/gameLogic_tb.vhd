@@ -82,7 +82,7 @@ begin
         
         -- Move 2: Human plays at cell 4 (center)
         report "Human selects cell 4";
-        inPort <= "010000010";  -- Select cell 4
+        inPort <= "100000010";  -- Select cell 4
         wait for 50 ns;
         report "Human presses execute";
         execute <= '1';         -- Press execute
