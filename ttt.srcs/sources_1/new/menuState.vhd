@@ -199,7 +199,7 @@ begin
                             report "case: PVE mode";
                         end if;
 
-                    when HUMAN =
+                    when HUMAN =>
                         if execute_pulse = '1' then
                             playerTurn_sig <= not playerTurn_sig;
                             report "HUMAN: playerTurn toggled";
